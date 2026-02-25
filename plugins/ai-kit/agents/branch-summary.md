@@ -2,6 +2,7 @@
 name: branch-summary
 description: 分析当前 Git 分支相对于主干分支（main/master）的所有变更，输出一段重点阐述"为什么要做这些修改"的简要中文描述
 tools: Bash
+model: GLM-5.0
 color: "#4A90D9"
 ---
 

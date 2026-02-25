@@ -15,8 +15,8 @@
   "extraKnownMarketplaces": {
     "ai-flow-kit": {
       "source": {
-        "source": "github",
-        "repo": "zhangheng/ai-flow-kit"
+        "source": "gitlab",
+        "repo": "pinhenzhang/ai-kit"
       }
     }
   },

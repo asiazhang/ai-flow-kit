@@ -31,13 +31,13 @@ ai-flow-kit/
   "extraKnownMarketplaces": {
     "ai-flow-kit": {
       "source": {
-        "source": "github",
-        "repo": "zhangheng/ai-flow-kit"
+        "source": "git",
+        "repo": "git@git.woa.com:pinhenzhang/ai-kit.git"
       }
     }
   },
   "enabledPlugins": {
-    "my-plugin@ai-flow-kit": true
+    "ai-kit@ai-flow-kit": true
   }
 }
 ```
