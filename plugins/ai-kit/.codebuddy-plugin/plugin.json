@@ -1,6 +1,6 @@
 {
   "name": "ai-kit",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "AI 工作流辅助工具集，提供分支变更摘要等实用命令",
   "author": {
     "name": "AI Flow Kit",
@@ -11,7 +11,8 @@
   "keywords": ["ai", "workflow", "git", "summary"],
   "category": "开发工具",
   "commands": [
-    "commands/branch-summary"
+    "commands/branch-summary",
+    "commands/new-feature"
   ],
   "agents": [
     "./agents/"
