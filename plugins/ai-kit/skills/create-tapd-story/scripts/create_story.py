@@ -150,30 +150,9 @@ def create_task(args: TaskArgs, config: TapdConfig) -> None:
 
     task = body["data"]["Story"]
     task_id = task["id"]
-    task_url = f"https://www.tapd.cn/{TAPD_WORKSPACE_ID}/prong/stories/view/{task_id}"
 
-    logger.success("TAPD 任务创建成功！")
-    print()
-    logger.info(f"标题：{task['name']}")
-    logger.info(f"单号：#{task_id}")
-    logger.info(f"链接：{task_url}")
-    logger.info(f"优先级：{task.get('priority', '-')}")
-    if task.get("owner"):
-        logger.info(f"处理人：{task['owner']}")
-    if task.get("developer"):
-        logger.info(f"开发人员：{task['developer']}")
-    if task.get("status"):
-        logger.info(f"状态：{task['status']}")
-    if task.get("iteration_id"):
-        logger.info(f"迭代 ID：{task['iteration_id']}")
-    if task.get("effort"):
-        logger.info(f"预估工时：{task['effort']} 小时")
-    if task.get("begin"):
-        logger.info(f"开始日期：{task['begin']}")
-    if task.get("due"):
-        logger.info(f"截止日期：{task['due']}")
-    if task.get("category_id"):
-        logger.info(f"任务分类：{task['category_id']}")
+    # 只输出重要信息：单号
+    logger.info(f"TAPD ID: #{task_id}")
 
 
 def main() -> None:
