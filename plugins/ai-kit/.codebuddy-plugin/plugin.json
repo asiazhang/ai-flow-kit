@@ -1,0 +1,21 @@
+{
+  "name": "ai-kit",
+  "version": "0.1.0",
+  "description": "AI 工作流辅助工具集，提供分支变更摘要等实用命令",
+  "author": {
+    "name": "AI Flow Kit",
+    "email": ""
+  },
+  "homepage": "https://git.woa.com/pinhenzhang/ai-kit",
+  "repository": "git@git.woa.com:pinhenzhang/ai-kit.git",
+  "keywords": ["ai", "workflow", "git", "summary"],
+  "category": "开发工具",
+  "commands": [
+    "commands/branch-summary"
+  ],
+  "agents": [
+    "./agents/"
+  ],
+  "skills": [],
+  "hooks": ""
+}
