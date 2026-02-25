@@ -36,8 +36,7 @@ class TaskArgs(BaseModel):
     """任务参数模型"""
 
     name: str
-    description: str = ""
-    version: str = ""
+    description: str
 
 
 class TapdConfig(BaseModel):
@@ -69,7 +68,6 @@ class TaskCreateRequest(BaseModel):
     developer: str | None = None
     iteration_id: str | None = None
     category_id: str | None = None
-    version: str | None = None
     workitem_type_id: str | None = None
 
 
@@ -112,12 +110,11 @@ def build_request(args: TaskArgs, config: TapdConfig) -> TaskCreateRequest:
         name=args.name,
         begin=today,
         due=tomorrow,
-        description=args.description or None,
+        description=args.description,
         owner=config.default_owner or None,
         developer=config.default_owner or None,
         iteration_id=config.iteration_id or None,
         category_id=config.category_id or None,
-        version=args.version or None,
         workitem_type_id=TAPD_WORKITEM_TYPE_ID,
     )
 
@@ -177,15 +174,12 @@ def create_task(args: TaskArgs, config: TapdConfig) -> None:
         logger.info(f"截止日期：{task['due']}")
     if task.get("category_id"):
         logger.info(f"任务分类：{task['category_id']}")
-    if task.get("version"):
-        logger.info(f"版本：{task['version']}")
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="创建 TAPD 任务")
     parser.add_argument("--name", required=True, help="任务标题（必填）")
-    parser.add_argument("--description", default="", help="详细描述，支持 HTML")
-    parser.add_argument("--version", default="", help="版本")
+    parser.add_argument("--description", required=True, help="详细描述，支持 Markdown")
 
     args = parser.parse_args()
 
@@ -194,7 +188,6 @@ def main() -> None:
     task_args = TaskArgs(
         name=args.name,
         description=args.description,
-        version=args.version,
     )
     config = get_config()
     create_task(task_args, config)
