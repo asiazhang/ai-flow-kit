@@ -14,12 +14,8 @@ description: 在 TAPD 中创建需求单（Story）。当用户需要提 TAPD �
 
 ## 调用示例
 
-```bash
-uv run scripts/create_story.py --name "<需求标题>" --description "<描述>"
-```
+使用 `{baseDirectory}` 占位符来引用脚本：
 
-配置从项目根目录 `.dev.env` 读取：
-- `TAPD_API_TOKEN` - API 令牌
-- `TAPD_DEFAULT_OWNER` - 默认处理人
-- `TAPD_ITERATION_ID` - 迭代 ID
-- `TAPD_CATEGORY_ID` - 任务分类 ID
+```bash
+uv run {baseDirectory}/scripts/create_story.py --name "<需求标题>" --description "<描述>"
+```
