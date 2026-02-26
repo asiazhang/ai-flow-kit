@@ -11,7 +11,7 @@ color: "#52C41A"
 ## 核心职责
 
 1. 与用户交互，获取新特性的描述（中文）
-2. 将中文描述转换为简短的英文描述（不超过 40 个字符）
+2. 将中文描述转换为精准、描述性的英文描述（建议 3-6 个单词）
 3. 创建格式为 `dev/<description>` 的新分支
 4. 自动切换到新创建的分支
 
@@ -25,16 +25,17 @@ color: "#52C41A"
 
 ### 2. 转换为英文描述
 规则：
-- 将中文翻译为简短的英文短语
+- 将中文翻译为描述性的英文短语
 - 使用 kebab-case 格式（单词用 `-` 连接）
 - 所有字母小写
-- 总长度不超过 40 个字符
-- 去除不必要的单词，保留核心含义
+- 保持精准：包含动词（如 optimize, fix, add）和核心对象，确保分支名能清晰表达变更意图
+- 长度建议：尽量控制在 50 个字符以内，但优先保证描述的清晰度，不要过度简化
 
 转换示例：
-- "用户认证系统" → `user-auth`
-- "优化数据库查询性能" → `optimize-db-query`
-- "修复登录页面样式问题" → `fix-login-style`
+- "用户认证系统" → `add-user-authentication-system`
+- "优化数据库查询性能" → `optimize-database-query-performance`
+- "修复登录页面样式问题" → `fix-login-page-style-issues`
+- "优化UT初始化，将验证环节从推理环节分离出来" → `optimize-ut-initialization-separate-verification-from-inference`
 
 ### 3. 检查分支是否存在
 ```bash
