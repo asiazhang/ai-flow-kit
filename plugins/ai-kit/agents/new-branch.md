@@ -12,8 +12,9 @@ color: "#52C41A"
 
 1. 与用户交互，获取新特性的描述（中文）
 2. 将中文描述转换为精准、描述性的英文描述（建议 3-6 个单词）
-3. 创建格式为 `dev/<description>` 的新分支
-4. 自动切换到新创建的分支
+3. 创建分支前先切换并更新主分支（main 或 master）
+4. 创建格式为 `dev/<description>` 的新分支
+5. 自动切换到新创建的分支
 
 ## 执行流程
 
@@ -37,17 +38,32 @@ color: "#52C41A"
 - "修复登录页面样式问题" → `fix-login-page-style-issues`
 - "优化UT初始化，将验证环节从推理环节分离出来" → `optimize-ut-initialization-separate-verification-from-inference`
 
-### 3. 检查分支是否存在
+### 3. 切换并更新主分支
+```bash
+if git show-ref --verify --quiet refs/heads/main; then
+  BASE_BRANCH=main
+elif git show-ref --verify --quiet refs/heads/master; then
+  BASE_BRANCH=master
+else
+  echo "❌ 未找到 main 或 master 分支"
+  exit 1
+fi
+
+git checkout "$BASE_BRANCH"
+git pull --ff-only origin "$BASE_BRANCH"
+```
+
+### 4. 检查分支是否存在
 ```bash
 git rev-parse --verify dev/<description> 2>/dev/null
 ```
 
-### 4. 创建新分支
+### 5. 创建新分支
 ```bash
 git checkout -b dev/<description>
 ```
 
-### 5. 确认操作
+### 6. 确认操作
 显示成功信息，包括：
 - 新分支名称
 - 基于的源分支（main 或 master）
@@ -58,6 +74,7 @@ git checkout -b dev/<description>
 - 如果分支已存在，提示用户选择是否覆盖或使用不同的名称
 - 如果当前 Git 状态不清洁（有未提交的更改），提示用户先提交或暂存变更
 - 如果 main/master 分支不存在，提示错误
+- 如果更新主分支失败（如存在冲突或远端不可达），提示用户先处理后再创建分支
 
 ## 输出示例
 
