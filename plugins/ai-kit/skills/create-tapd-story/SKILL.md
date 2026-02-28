@@ -10,12 +10,12 @@ description: 在 TAPD 中创建需求单（Story）。当用户需要提 TAPD �
 ## 必填参数
 
 - **name**：需求标题
-- **description**：详细描述，支持 Markdown
+- **description_file**：详细描述文件路径（UTF-8，支持 Markdown）
 
 ## 调用示例
 
 使用 `{baseDirectory}` 占位符来引用脚本：
 
 ```bash
-uv run {baseDirectory}/scripts/create_story.py --name "<需求标题>" --description "<描述>"
+uv run {baseDirectory}/scripts/create_story.py --name "<需求标题>" --description-file "<描述文件路径>"
 ```

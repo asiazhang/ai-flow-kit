@@ -6,6 +6,7 @@
 #     "python-dotenv>=1.0",
 #     "loguru>=0.7",
 #     "httpx>=0.27",
+#     "markdown>=3.7",
 # ]
 # ///
 """
@@ -25,6 +26,7 @@ from datetime import date, timedelta
 from pathlib import Path
 
 import httpx
+import markdown
 from dotenv import load_dotenv
 from loguru import logger
 from pydantic import BaseModel, Field, ValidationError
@@ -64,6 +66,7 @@ class TaskCreateRequest(BaseModel):
     begin: date
     due: date
     description: str | None = None
+    description_type: str = "1"
     owner: str | None = None
     developer: str | None = None
     iteration_id: str | None = None
@@ -100,6 +103,18 @@ def get_config() -> TapdConfig:
         sys.exit(1)
 
 
+def markdown_to_tapd_html(text: str) -> str:
+    """将 Markdown 文本转换为 TAPD 可展示的 HTML。"""
+    normalized = text.replace("\r\n", "\n").replace("\r", "\n").strip()
+    if not normalized:
+        return "<p></p>"
+
+    return markdown.markdown(
+        normalized,
+        extensions=["extra", "sane_lists", "nl2br"],
+    )
+
+
 def build_request(args: TaskArgs, config: TapdConfig) -> TaskCreateRequest:
     """构建 TAPD 创建任务请求。"""
     today = date.today()
@@ -110,7 +125,7 @@ def build_request(args: TaskArgs, config: TapdConfig) -> TaskCreateRequest:
         name=args.name,
         begin=today,
         due=tomorrow,
-        description=args.description,
+        description=markdown_to_tapd_html(args.description),
         owner=config.default_owner or None,
         developer=config.default_owner or None,
         iteration_id=config.iteration_id or None,
@@ -155,10 +170,25 @@ def create_task(args: TaskArgs, config: TapdConfig) -> None:
     logger.info(f"TAPD ID: #{task_id}")
 
 
+def read_description_file(description_file: str) -> str:
+    """从文件读取需求描述，避免 shell 传参导致换行丢失。"""
+    path = Path(description_file).expanduser()
+
+    if not path.exists() or not path.is_file():
+        logger.error(f"描述文件不存在：{path}")
+        sys.exit(1)
+
+    try:
+        return path.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        logger.error(f"描述文件编码错误（需 UTF-8）：{path}")
+        sys.exit(1)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="创建 TAPD 任务")
     parser.add_argument("--name", required=True, help="任务标题（必填）")
-    parser.add_argument("--description", required=True, help="详细描述，支持 Markdown")
+    parser.add_argument("--description-file", required=True, help="详细描述文件路径（UTF-8，支持 Markdown）")
 
     args = parser.parse_args()
 
@@ -166,7 +196,7 @@ def main() -> None:
 
     task_args = TaskArgs(
         name=args.name,
-        description=args.description,
+        description=read_description_file(args.description_file),
     )
     config = get_config()
     create_task(task_args, config)
