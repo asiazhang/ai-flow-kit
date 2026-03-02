@@ -20,17 +20,22 @@ color: "#4A90D9"
    git --no-pager branch | grep -E "^\*?\s*(main|master)$" | head -1
    ```
 
-3. 获取提交历史（了解开发者意图）：
+3. 在比较前同步本地主干分支（避免基于过期主干分析）：
+   ```bash
+   git --no-pager fetch origin <base>:<base>
+   ```
+
+4. 获取提交历史（了解开发者意图）：
    ```bash
    git --no-pager log <base>..HEAD --oneline
    ```
 
-4. 获取变更 diff：
+5. 获取变更 diff：
    ```bash
    git --no-pager diff <base>...HEAD
    ```
 
-5. 综合分析后输出摘要。
+6. 综合分析后输出摘要。
 
 ## 输出格式
 
