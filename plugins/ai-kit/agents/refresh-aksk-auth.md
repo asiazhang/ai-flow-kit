@@ -2,7 +2,7 @@
 name: refresh-aksk-auth
 description: 刷新 AKSK 认证并生成 set-aksk 临时命令文件，输出可执行文件路径
 tools: Bash
-model: GLM-5.0
+model: glm-5.0-ioa
 color: "#13C2C2"
 ---
 
