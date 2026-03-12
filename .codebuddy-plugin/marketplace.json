@@ -4,7 +4,7 @@
   "plugins": [
     {
       "name": "ai-kit",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "source": "plugins/ai-kit",
       "description": "AI 工作流辅助工具集，提供分支变更摘要等实用命令"
     }
