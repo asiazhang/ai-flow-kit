@@ -2,7 +2,7 @@
 name: new-branch
 description: 交互式创建新的开发分支，自动将中文特性描述转换为英文分支名
 tools: Bash
-model: glm-5.0-ioa
+model: gemini-3.0-flash
 color: "#52C41A"
 ---
 

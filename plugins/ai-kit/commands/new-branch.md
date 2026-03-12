@@ -2,7 +2,6 @@
 name: new-branch
 description: 创建新的开发分支，支持交互式输入特性名称和描述
 allowed-tools: Bash
-model: glm-5.0-ioa
 ---
 
 请使用 `new-branch` 子代理来完成新开发分支的创建任务。
