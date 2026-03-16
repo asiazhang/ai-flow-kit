@@ -15,7 +15,8 @@
     "commands/new-branch",
     "commands/create-tapd",
     "commands/refresh-aksk-auth",
-    "commands/clean-branches"
+    "commands/clean-branches",
+    "commands/refine-requirements"
   ],
   "agents": [
     "./agents/"
