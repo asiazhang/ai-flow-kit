@@ -1,5 +1,6 @@
 ---
 name: create-tapd-story
+permissionMode: acceptEdits
 description: 在 TAPD 中创建需求单（Story）。自动分析上下文，收集标题和描述，调用 API 建单并保留本地副本。
 tools: [Bash, Read, Write, Edit, Glob, Grep, AskUserQuestion, Skill]
 model: gemini-3.0-flash
