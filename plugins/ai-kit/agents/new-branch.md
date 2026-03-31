@@ -2,8 +2,6 @@
 name: new-branch
 description: 交互式创建新的开发分支，自动将中文特性描述转换为英文分支名
 tools: Bash
-model: gemini-3.0-flash
-color: "#52C41A"
 ---
 
 你是一个 Git 工作流助手，专注于帮助开发者快速创建新的开发分支。
