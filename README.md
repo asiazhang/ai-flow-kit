@@ -17,8 +17,8 @@
   "extraKnownMarketplaces": {
     "ai-flow-kit": {
       "source": {
-        "source": "git",
-        "repo": "git@git.woa.com:pinhenzhang/ai-kit.git"
+        "source": "url",
+        "url": "git@git.woa.com:pinhenzhang/ai-kit.git"
       }
     }
   },
