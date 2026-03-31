@@ -1,6 +1,5 @@
 {
-  "name": "AI Flow Kit Marketplace",
-  "description": "A curated collection of Claude Code plugins for AI workflow development",
+  "name": "ai-flow-kit-marketplace",
   "owner": {
     "name": "AI Flow Kit",
     "email": ""
@@ -8,8 +7,8 @@
   "plugins": [
     {
       "name": "ai-kit",
-      "version": "1.0.6",
-      "source": "plugins/ai-kit",
+      "version": "1.0.7",
+      "source": "./plugins/ai-kit",
       "description": "AI 工作流辅助工具集，提供分支变更摘要、分支管理、提交推送等实用命令"
     }
   ]
