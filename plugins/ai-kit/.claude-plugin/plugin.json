@@ -18,7 +18,6 @@
     "./commands/refine-requirements",
     "./commands/commit-and-push"
   ],
-  "agents": "./agents/",
   "skills": [
     "./skills/create-tapd-story"
   ]
