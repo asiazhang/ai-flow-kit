@@ -17,8 +17,8 @@
   "extraKnownMarketplaces": {
     "ai-flow-kit": {
       "source": {
-        "source": "url",
-        "url": "git@git.woa.com:pinhenzhang/ai-kit.git"
+        "source": "git",
+        "repo": "git@git.woa.com:pinhenzhang/ai-kit.git"
       }
     }
   },
@@ -57,4 +57,3 @@
 ## 贡献
 
 参考 [AGENTS.md](./AGENTS.md) 了解如何开发和添加新插件。
-自定义AI工作流

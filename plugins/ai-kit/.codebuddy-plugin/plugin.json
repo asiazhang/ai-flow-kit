@@ -1,6 +1,6 @@
 {
   "name": "ai-kit",
-  "version": "0.5.6",
+  "version": "0.5.7",
   "description": "AI 工作流辅助工具集，提供分支变更摘要等实用命令",
   "author": {
     "name": "AI Flow Kit",
@@ -19,9 +19,7 @@
     "commands/refine-requirements",
     "commands/commit-and-push"
   ],
-  "agents": [
-    "./agents/"
-  ],
+  "agents": "./agents/",
   "skills": [
     "skills/create-tapd-story"
   ],

@@ -38,22 +38,19 @@ tools: Bash
 
 ### 3. 切换并更新主分支
 ```bash
-if git show-ref --verify --quiet refs/heads/main; then
-  BASE_BRANCH=main
-elif git show-ref --verify --quiet refs/heads/master; then
-  BASE_BRANCH=master
-else
-  echo "❌ 未找到 main 或 master 分支"
-  exit 1
-fi
+# 尝试切换到 main 或 master 分支
+git checkout main 2>/dev/null || git checkout master 2>/dev/null
 
-git checkout "$BASE_BRANCH"
-git pull --ff-only origin "$BASE_BRANCH"
+# 确认当前已在主分支上
+git branch --show-current
+
+# 更新当前主分支
+git pull --ff-only origin HEAD
 ```
 
 ### 4. 检查分支是否存在
 ```bash
-git rev-parse --verify dev/<description> 2>/dev/null
+git rev-parse --verify dev/<description>
 ```
 
 ### 5. 创建新分支
