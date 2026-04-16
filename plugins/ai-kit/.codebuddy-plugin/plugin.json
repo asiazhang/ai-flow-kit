@@ -1,6 +1,6 @@
 {
   "name": "ai-kit",
-  "version": "0.5.7",
+  "version": "0.5.8",
   "description": "AI 工作流辅助工具集，提供分支变更摘要等实用命令",
   "author": {
     "name": "AI Flow Kit",
@@ -13,6 +13,7 @@
   "commands": [
     "commands/branch-summary",
     "commands/new-branch",
+    "commands/new-worktree",
     "commands/create-tapd",
     "commands/refresh-aksk-auth",
     "commands/clean-branches",
