@@ -2,10 +2,6 @@
 
 This file provides guidance to AI agents (Claude Code, CodeBuddy, etc.) when working with code in this repository.
 
-## Project Overview
-
-`ai-flow-kit` 是一个**双平台插件市场**，同时支持 Claude Code 和 CodeBuddy，提供一系列可复用的 AI 工作流插件，供团队安装和使用。
-
 ## 仓库结构
 
 ```
@@ -25,48 +21,6 @@ ai-flow-kit/
 │       ├── skills/            # AI 技能（可选）
 │       └── hooks/             # 事件钩子（可选）
 └── README.md
-```
-
-## 如何引用此插件市场
-
-### Claude Code
-
-在项目的 `.claude/settings.json` 中添加以下配置：
-
-```json
-{
-  "extraKnownMarketplaces": {
-    "ai-flow-kit": {
-      "source": {
-        "source": "git",
-        "repo": "git@git.woa.com:pinhenzhang/ai-kit.git"
-      }
-    }
-  },
-  "enabledPlugins": {
-    "ai-kit@ai-flow-kit": true
-  }
-}
-```
-
-### CodeBuddy
-
-在项目的 `.codebuddy/settings.json` 中添加以下配置：
-
-```json
-{
-  "extraKnownMarketplaces": {
-    "ai-flow-kit": {
-      "source": {
-        "source": "git",
-        "repo": "git@git.woa.com:pinhenzhang/ai-kit.git"
-      }
-    }
-  },
-  "enabledPlugins": {
-    "ai-kit@ai-flow-kit": true
-  }
-}
 ```
 
 ## 开发新插件
@@ -126,6 +80,8 @@ tools: Bash, Read, Write, Edit, Glob, Grep
 - **不要设置 `model` 字段**，省略后各平台会使用自身默认模型，同时兼容 Claude Code 和 CodeBuddy
 - Claude Code **不支持** `color` 字段，请勿添加
 - `tools` 值为逗号分隔字符串，不使用 YAML 数组（`[...]`）格式
+- 可用工具列表及权限说明请参考 [CodeBuddy 工具配置文档](https://cnb.cool/codebuddy/codebuddy-code/-/git/raw/main/docs/settings.md)，常用工具：`Bash`, `Read`, `Write`, `Edit`, `MultiEdit`, `Glob`, `Grep`, `WebFetch`, `WebSearch`, `Skill`
+- 完整的子代理配置字段和高级用法（如 `permissionMode`、`skills`、后台代理、可恢复代理等）请参考 [CodeBuddy 子代理文档](https://cnb.cool/codebuddy/codebuddy-code/-/git/raw/main/docs/sub-agents.md)
 
 ### 5. 验证插件
 
