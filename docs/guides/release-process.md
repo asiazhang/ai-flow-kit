@@ -32,14 +32,16 @@ git pull
 4. 填写各分类下的变更条目（仅记录对使用者可见的变更，内部重构等不写入）
 5. 删除模板中的注释说明块
 
-### 3. 更新版本号（4 处）
+### 3. 更新版本号（6 处）
 
 | # | 文件 | 字段 | 修改方式 |
 |---|------|------|---------|
 | 1 | `plugins/ai-kit/.codebuddy-plugin/plugin.json` | `"version"` | 改为 `"X.Y.Z"` |
 | 2 | `plugins/ai-kit/.claude-plugin/plugin.json` | `"version"` | 改为 `"X.Y.Z"` |
-| 3 | `.codebuddy-plugin/marketplace.json` | `plugins[0].version` | 改为 `"X.Y.Z"` |
-| 4 | `.claude-plugin/marketplace.json` | `plugins[0].version` | 改为 `"X.Y.Z"` |
+| 3 | `plugins/ai-kit/.codex-plugin/plugin.json` | `"version"` | 改为 `"X.Y.Z"` |
+| 4 | `.codebuddy-plugin/marketplace.json` | `plugins[0].version` | 改为 `"X.Y.Z"` |
+| 5 | `.claude-plugin/marketplace.json` | `plugins[0].version` | 改为 `"X.Y.Z"` |
+| 6 | `.agents/plugins/marketplace.json` | `plugins[0].version` | 改为 `"X.Y.Z"` |
 
 ### 4. 提交与标签
 
