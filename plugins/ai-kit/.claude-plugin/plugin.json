@@ -1,26 +1,8 @@
 {
   "name": "ai-kit",
-"version": "0.5.11",
   "description": "AI 工作流辅助工具集，提供分支变更摘要等实用命令",
+  "version": "0.5.11",
   "author": {
-    "name": "AI Flow Kit",
-    "email": ""
-  },
-  "homepage": "https://git.woa.com/pinhenzhang/ai-kit",
-  "repository": "git@git.woa.com:pinhenzhang/ai-kit.git",
-  "keywords": ["ai", "workflow", "git", "summary"],
-  "commands": [
-    "./commands/branch-summary.md",
-    "./commands/new-branch.md",
-    "./commands/new-worktree.md",
-    "./commands/create-tapd.md",
-    "./commands/refresh-aksk-auth.md",
-    "./commands/clean-branches.md",
-    "./commands/refine-requirements.md",
-    "./commands/commit-and-push.md"
-  ],
-  "agents": "./agents/",
-  "skills": [
-    "./skills/create-tapd-story"
-  ]
+    "name": "AI Flow Kit"
+  }
 }
