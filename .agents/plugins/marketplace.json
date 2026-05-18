@@ -4,7 +4,7 @@
   "plugins": [
     {
       "name": "ai-kit",
-      "version": "0.5.13",
+      "version": "0.5.14",
       "source": {
         "type": "git-subdir",
         "path": "./plugins/ai-kit"
