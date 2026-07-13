@@ -2,6 +2,12 @@
 
 本文件记录 AI Flow Kit 的所有版本变更，遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/) 规范，版本号遵循 [SemVer](https://semver.org/)。
 
+## [0.5.15] - 2026-07-13
+
+### Removed
+
+- **new-worktree Agent/Command/Skill**：移除 `new-worktree` 功能（创建 git worktree 和开发分支），长期未使用
+
 ## [0.5.14] - 2026-05-18
 
 ### Changed
