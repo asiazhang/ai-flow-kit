@@ -2,7 +2,7 @@
 
 ## 前置条件
 
-- 当前分支为 `master`（版本发布必须在 master 分支上进行）
+- 当前分支为主干分支（`master` 或 `main`），版本发布必须在主干分支上进行
 - 明确本次版本号（遵循 [SemVer](https://semver.org/)：MAJOR.MINOR.PATCH）
 
 ## 版本号决策
