@@ -1,41 +1,27 @@
 ---
 name: create-tapd-story
-description: 在 TAPD 中创建需求单（Story）。自动分析上下文，收集标题和描述，调用 API 建单并保留本地副本。
+description: 在 TAPD 中创建需求单。
 disable-model-invocation: true
 tools: Bash, Read, Write, Edit, Glob, Grep, AskUserQuestion
 ---
 
-你是一个专门负责在 TAPD 中创建需求单（Story）的助手。你的目标是根据当前对话上下文、代码变更及用户意图，自动生成并创建专业的 TAPD 需求。
-
 ## 执行流程
 
-1.  **需求分析与提炼**：
-    -   深度扫描当前对话历史、代码库现状及近期操作，自主提炼需求的背景、目标及技术实现要点。
-    -   如果核心需求（"要做什么"）完全无法推断，请使用 `AskUserQuestion` 引导用户提供最关键的功能描述。
-    -   **避免琐碎提问**：基于核心定义进行合理的逻辑推演与扩写，不要反复确认细节。
+1. **推断需求**：基于对话历史、代码现状，自主提炼背景、目标和技术要点。
+   - 只在核心需求完全无法推断时，才用 `AskUserQuestion` 询问最关键的功能描述。
+   - 其余细节基于现有信息合理推演，不追问。
 
-2.  **生成需求标题与描述**：
-    -   **描述**：生成一份结构清晰、专业的 Markdown 描述（包含背景、目标、功能要求及验收标准）。
-    -   **标题**：从描述中自动提炼出一个简洁、准确的**需求标题**。
+2. **生成标题与描述**：输出一份包含背景、目标、功能要求、验收标准的 Markdown 描述，并从中提炼一句简洁的需求标题。
+   - 完成标准：标题和描述都已就绪，可以写入文件。
 
-3.  **调用建单脚本**：
-    -   将生成的描述写入临时文件。
-    -   使用以下命令调用底层 Python 脚本：
+3. **调用建单脚本**：
 
-    ```bash
-    uv run {baseDirectory}/scripts/create_story.py --name "<name>" --description-file "<description_file>"
-    ```
+   ```bash
+   uv run {baseDirectory}/scripts/create_story.py --name "<标题>" --description-file "<描述临时文件>"
+   ```
 
-    -   脚本执行后将输出生成的 TAPD 链接和 ID（例如：`TAPD ID: #1069995517132461036`）。
+   - 完成标准：脚本输出 `TAPD ID: #<ID>`。
 
-4.  **本地备份**：
-    -   在当前项目的 `ai-dev/tapd/YYYY/MM/` 目录下创建一个 Markdown 文件备份需求。
-    -   **目录格式**：`ai-dev/tapd/2026/03/`（根据当前日期动态调整）。
-    -   **文件名**：`story_<TAPD_ID>.md`（例如：`story_1069995517132461036.md`）。
-    -   **内容**：完整的需求描述，采用专业的 Markdown 格式化排版。
-
-## 注意事项
-
--   确保描述内容详实、专业。
--   在脚本执行成功后，务必完成本地备份步骤。
--   直接向用户返回 TAPD 链接。
+4. **本地备份**：在 `ai-dev/tapd/YYYY/MM/` 下创建 `story_<TAPD_ID>.md`，写入完整描述。
+   - 目录日期取当前日期。
+   - 完成后向用户展示 TAPD 链接。
