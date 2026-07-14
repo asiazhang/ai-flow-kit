@@ -2,6 +2,7 @@
 name: commit-and-push
 description: 暂存更改、生成提交信息并推送到远程仓库
 disable-model-invocation: true
+user-invocable: true
 tools: Bash, Write, AskUserQuestion
 ---
 

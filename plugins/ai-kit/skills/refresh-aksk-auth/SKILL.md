@@ -2,6 +2,7 @@
 name: refresh-aksk-auth
 description: 刷新 AKSK 认证并生成 set-aksk 临时命令文件，输出可执行文件路径
 disable-model-invocation: true
+user-invocable: true
 tools: Bash
 ---
 

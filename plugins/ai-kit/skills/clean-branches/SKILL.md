@@ -2,6 +2,7 @@
 name: clean-branches
 description: 检查本地 Git 分支，清理远程已删除的失效分支
 disable-model-invocation: true
+user-invocable: true
 tools: Bash
 ---
 

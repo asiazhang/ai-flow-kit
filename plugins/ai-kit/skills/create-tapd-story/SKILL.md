@@ -2,6 +2,7 @@
 name: create-tapd-story
 description: 在 TAPD 中创建需求单。
 disable-model-invocation: true
+user-invocable: true
 tools: Bash, Read, Write, Edit, Glob, Grep, AskUserQuestion
 ---
 
