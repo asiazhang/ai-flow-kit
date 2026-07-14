@@ -2,6 +2,16 @@
 
 本文件记录 AI Flow Kit 的所有版本变更，遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/) 规范，版本号遵循 [SemVer](https://semver.org/)。
 
+## [0.6.0] - 2026-07-14
+
+### Changed
+
+- **技能架构**：将 Agents 和 Commands 统一迁移为 Skills-only 架构，简化插件能力模型
+
+### Removed
+
+- **refine-requirements Skill**：移除 `refine-requirements` 功能（需求完善 Agent）
+
 ## [0.5.15] - 2026-07-13
 
 ### Removed
