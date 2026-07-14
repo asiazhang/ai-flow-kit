@@ -23,7 +23,7 @@ git status --short
 
 逐一暂存其余文件：`git add <path>`。若工作区存在大量互不相关的变更，先向用户确认需要提交哪些文件，再逐一暂存。
 
-完成条件：`git --no-pager diff --cached --name-only` 列出所有目标文件，且不含任何跳过模式。跳过文件列表已记录（路径列表），供 Step 4 输出摘要。
+完成条件：`git --no-pager diff --cached --name-only` 列出所有目标文件，且不含任何跳过模式。
 
 ## 3. 提交
 
@@ -44,7 +44,7 @@ rm /tmp/git-commit-msg.txt
 
 若 pre-commit hook 修改了暂存文件：重新暂存并重新提交。
 
-完成条件：`git commit` 执行成功，暂存区无残留变更（`git diff --cached` 空）。提交信息符合 `<type>(<scope>): <subject>` 格式，类型为合法取值，subject ≤50 字符。
+完成条件：`git commit` 执行成功，暂存区无残留变更（`git diff --cached` 空）。提交信息符合 Conventional Commits 格式，subject ≤50 字符。
 
 ## 4. 推送
 
