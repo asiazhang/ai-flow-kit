@@ -1,6 +1,7 @@
 ---
 name: refine-requirements
 description: 需求完善专家：读取需求文档并扫描代码，直接更新文档以补充完善需求并增加实施步骤
+disable-model-invocation: true
 tools: Read, Write, Edit, Glob, Grep
 ---
 

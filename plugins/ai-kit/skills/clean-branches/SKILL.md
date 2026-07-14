@@ -1,6 +1,7 @@
 ---
 name: clean-branches
 description: 分析并清理本地存在但远程已删除（stale）的 Git 分支
+disable-model-invocation: true
 tools: Bash
 ---
 

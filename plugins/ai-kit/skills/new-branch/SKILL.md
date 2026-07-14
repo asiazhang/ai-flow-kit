@@ -1,6 +1,7 @@
 ---
 name: new-branch
 description: 交互式创建新的开发分支，自动将中文特性描述转换为英文分支名
+disable-model-invocation: true
 tools: Bash
 ---
 
