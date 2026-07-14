@@ -13,7 +13,7 @@ git rev-parse --is-inside-work-tree
 git status --short
 ```
 
-完成条件：状态输出已解析。无变更 → 告知用户并停止。有变更 → 继续。
+完成条件：`git status --short` 输出空 → 检查 `git log origin/HEAD..HEAD --oneline` 是否有未推送提交；有则跳过暂存和提交，直接执行推送（Step 4）。无任何变更且无未推送提交 → 告知用户"无变更"并停止。非空 → 继续。
 
 ## 2. 暂存文件
 
@@ -23,7 +23,7 @@ git status --short
 
 逐一暂存其余文件：`git add <path>`。若工作区存在大量互不相关的变更，先向用户确认需要提交哪些文件，再逐一暂存。
 
-完成条件：`git --no-pager diff --cached --name-only` 列出所有目标文件，且不含任何跳过模式。
+完成条件：`git --no-pager diff --cached --name-only` 列出所有目标文件，且不含任何跳过模式。跳过文件列表已记录（路径列表），供 Step 4 输出摘要。
 
 ## 3. 提交
 
@@ -44,7 +44,7 @@ rm /tmp/git-commit-msg.txt
 
 若 pre-commit hook 修改了暂存文件：重新暂存并重新提交。
 
-完成条件：提交成功，暂存区无残留变更。
+完成条件：`git commit` 执行成功，暂存区无残留变更（`git diff --cached` 空）。提交信息符合 `<type>(<scope>): <subject>` 格式，类型为合法取值，subject ≤50 字符。
 
 ## 4. 推送
 
@@ -62,4 +62,4 @@ git push origin HEAD
 
 若 rebase 出现冲突：停止操作，报告冲突文件路径，让用户手动解决。
 
-完成条件：`git status` 显示分支已与 origin 同步。输出摘要：提交哈希和消息、推送分支、已提交文件、已跳过文件。
+完成条件：`git status` 显示分支已与 origin 同步。输出摘要：推送的提交（哈希+消息）、推送分支。若 Step 2-3 已执行：附加已提交文件、已跳过文件。
