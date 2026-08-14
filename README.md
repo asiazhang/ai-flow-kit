@@ -16,6 +16,8 @@ npx skills@latest add asiazhang/ai-flow-kit
 
 安装命令会从 GitHub 仓库获取可用 Skill，并引导你选择需要安装的 Skill 和目标 AI 编程助手。
 
+仓库提供 `.claude-plugin/plugin.json` 作为 Skill 集合元数据，因此安装时会将这些 Skill 聚合为 `AI Flow Kit` 分组。进入分组后可使用空格选择多个 Skill，或直接选择分组完成全选。
+
 ## 可用 Skill
 
 | Skill | 描述 |

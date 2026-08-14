@@ -1,0 +1,12 @@
+{
+  "name": "ai-flow-kit",
+  "version": "1.0.1",
+  "description": "AI Flow Kit 工作流 Skill 集合",
+  "repository": "https://github.com/asiazhang/ai-flow-kit",
+  "skills": [
+    "./skills/branch-summary",
+    "./skills/clean-branches",
+    "./skills/commit-and-push",
+    "./skills/new-branch"
+  ]
+}

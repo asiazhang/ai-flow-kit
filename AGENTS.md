@@ -10,7 +10,7 @@
 npx skills@latest add asiazhang/ai-flow-kit
 ```
 
-本仓库使用独立的 Skill 目录结构，不使用插件市场或插件清单模式。
+本仓库使用独立的 Skill 目录结构，并通过 `.claude-plugin/plugin.json` 提供 Skill 集合元数据。该文件只用于让 Skills CLI 将 Skill 聚合为一个可批量选择的分组，不使用插件市场清单或插件安装流程。
 
 ## 仓库结构
 
@@ -19,6 +19,8 @@ ai-flow-kit/
 ├── skills/
 │   └── <skill-name>/
 │       └── SKILL.md
+├── .claude-plugin/
+│   └── plugin.json
 ├── docs/
 │   └── guides/
 ├── CHANGELOG.md
@@ -43,7 +45,24 @@ description: 清晰描述 Skill 的用途和适用场景
 ---
 ```
 
-按需补充 `user-invocable`、`disable-model-invocation` 和 `tools` 等字段。Skill 应保持与主流 AI 编程助手的兼容性，不添加特定平台专属的插件清单配置。
+按需补充 `user-invocable`、`disable-model-invocation` 和 `tools` 等字段。Skill 应保持与主流 AI 编程助手的兼容性。
+
+`.claude-plugin/plugin.json` 中的 `skills` 数组必须列出所有可安装 Skill 的相对路径：
+
+```json
+{
+  "name": "ai-flow-kit",
+  "version": "1.0.1",
+  "skills": [
+    "./skills/branch-summary",
+    "./skills/clean-branches",
+    "./skills/commit-and-push",
+    "./skills/new-branch"
+  ]
+}
+```
+
+新增或删除 Skill 时，必须同步更新这个数组和 README 中的 Skill 列表。
 
 ### 编写内容
 
@@ -68,6 +87,6 @@ git status --short
 
 ## 版本与发布
 
-面向用户的变更记录在 `CHANGELOG.md` 中维护。发布时遵循 [SemVer](https://semver.org/) 并创建对应的 Git tag；无需同步插件版本号或市场清单。
+面向用户的变更记录在 `CHANGELOG.md` 中维护。发布时遵循 [SemVer](https://semver.org/) 并创建对应的 Git tag；需要同步 `.claude-plugin/plugin.json` 中的版本号，不需要维护插件市场清单。
 
 完整发布流程参见 [`docs/guides/release-process.md`](docs/guides/release-process.md)。

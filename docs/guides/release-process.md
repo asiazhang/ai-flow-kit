@@ -33,14 +33,19 @@ git pull --ff-only
 4. 填写各分类下的变更条目，仅记录对使用者可见的变更
 5. 删除模板中的注释说明块
 
-### 3. 检查 Skill
+### 3. 检查 Skill 和集合清单
 
 ```bash
 find skills -mindepth 2 -maxdepth 2 -name SKILL.md -print | sort
+cat .claude-plugin/plugin.json
 git diff --check
 ```
 
-确认新增、修改或删除的 Skill 已同步反映在 README 中。
+确认新增、修改或删除的 Skill 已同步反映在以下位置：
+
+- `README.md` 的 Skill 列表
+- `.claude-plugin/plugin.json` 的 `skills` 数组
+- `CHANGELOG.md` 的发布条目（如属于用户可见变更）
 
 ### 4. 提交与标签
 

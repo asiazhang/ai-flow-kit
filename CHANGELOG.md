@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.1] - 2026-08-14
+
+### Added
+
+- **Skills CLI 分组**：增加 `.claude-plugin/plugin.json`，在安装时将仓库中的 Skill 聚合为 `AI Flow Kit` 分组，支持批量选择
+
+### Changed
+
+- **安装说明**：补充多选和全选 Skill 的使用说明
+- **开发与发布文档**：增加 Skill 集合清单的维护和校验步骤
+
 ## [1.0.0] - 2026-08-14
 
 ### Changed
