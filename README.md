@@ -1,59 +1,34 @@
 # AI Flow Kit
 
-> A curated plugin marketplace for AI workflow development — supports both **CodeBuddy** and **Claude Code**.
+> A collection of reusable AI workflow skills for coding agents.
 
 ## 简介
 
-`ai-flow-kit` 是一个双平台插件市场，同时支持 [CodeBuddy](https://www.codebuddy.cn) 和 [Claude Code](https://claude.ai/code)，提供一系列专为 AI 工作流设计的插件，帮助团队快速构建和标准化 AI 辅助开发流程。
+`ai-flow-kit` 提供一组可复用的 AI 工作流 Skill，帮助团队标准化分支管理、变更总结、提交推送等开发流程。
 
-## 快速开始
+## 安装
 
-### Claude Code
+使用 Skills CLI 安装：
 
-在你的项目中添加 `.claude/settings.json`：
-
-```json
-{
-  "extraKnownMarketplaces": {
-    "ai-flow-kit": {
-      "source": {
-        "source": "git",
-        "repo": "git@git.woa.com:pinhenzhang/ai-kit.git"
-      }
-    }
-  },
-  "enabledPlugins": {
-    "ai-kit@ai-flow-kit": true
-  }
-}
+```bash
+npx skills@latest add asiazhang/ai-flow-kit
 ```
 
-### CodeBuddy
+安装命令会从 GitHub 仓库获取可用 Skill，并引导你选择需要安装的 Skill 和目标 AI 编程助手。
 
-在你的项目中添加 `.codebuddy/settings.json`：
+## 可用 Skill
 
-```json
-{
-  "extraKnownMarketplaces": {
-    "ai-flow-kit": {
-      "source": {
-        "source": "git",
-        "repo": "git@git.woa.com:pinhenzhang/ai-kit.git"
-      }
-    }
-  },
-  "enabledPlugins": {
-    "ai-kit@ai-flow-kit": true
-  }
-}
-```
+| Skill | 描述 |
+|-------|------|
+| `branch-summary` | 分析当前 Git 分支相对主干分支的变更，并总结修改原因 |
+| `clean-branches` | 检查并清理远程已删除的本地失效分支 |
+| `commit-and-push` | 暂存更改、生成提交信息并推送到远程仓库 |
+| `new-branch` | 将中文特性描述转换为英文分支名，并创建开发分支 |
 
-## 可用插件
+## 开发
 
-| 插件名 | 描述 |
-|--------|------|
-| `ai-kit` | AI 工作流辅助工具集，提供分支变更摘要等实用命令 |
+Skill 定义在 `skills/<skill-name>/SKILL.md`。新增或修改 Skill 前，请参考 [AGENTS.md](./AGENTS.md) 中的开发规范。
 
-## 贡献
+## 发布
 
-参考 [AGENTS.md](./AGENTS.md) 了解如何开发和添加新插件。
+发布流程参见 [`docs/guides/release-process.md`](docs/guides/release-process.md)。
