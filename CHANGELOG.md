@@ -4,7 +4,7 @@
 
 ### Fixed
 
-- **`branch-summary` Skill**：避免 fetch 到正在检出的本地主干，改用远程跟踪分支并增加仓库、远程和同步失败检查
+- **`branch-summary` Skill**：分支已通过 merge 提交合入主干后不再误报“没有已提交文件变更”，自动回退到合并前的主干作基准并输出 `BRANCH_MERGED`/`MERGE_COMMIT`；提交列表过滤同步主干产生的合并提交，避免噪音
 - **`clean-branches` Skill**：使用机器可读的 Git ref 信息识别失效分支，默认安全删除并避免误删当前分支或未合并提交
 - **`commit-and-push` Skill**：改用当前分支 upstream 判断未推送提交，增加暂存区凭证检查、混合修改处理和推送前确认，禁止自动 rebase
 - **`new-branch` Skill**：增加工作区和分支名校验，修复主分支切换失败及 `origin/HEAD` 可能拉错分支的问题
