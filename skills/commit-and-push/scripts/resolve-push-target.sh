@@ -51,6 +51,12 @@ if [[ -n "$upstream_remote" && "$upstream_remote" != "." && -n "$upstream_merge"
     exit 1
   }
   pending_commits="$(git --no-pager log "$upstream_ref..HEAD" --oneline)"
+  behind_commits="$(git --no-pager log "HEAD..$upstream_ref" --oneline)"
+  if [[ -n "$behind_commits" ]]; then
+    remote_ahead=true
+  else
+    remote_ahead=false
+  fi
 else
   push_remote="origin"
   push_branch="$current_branch"
@@ -62,6 +68,8 @@ else
     exit 1
   }
   pending_commits="$(git --no-pager log -1 --oneline HEAD)"
+  behind_commits=""
+  remote_ahead=false
 fi
 
 status="$(git status --porcelain)"
@@ -89,6 +97,10 @@ fi
 echo "PENDING_COMMITS_BEGIN"
 printf '%s\n' "$pending_commits"
 echo "PENDING_COMMITS_END"
+printf 'REMOTE_AHEAD=%s\n' "$remote_ahead"
+echo "BEHIND_COMMITS_BEGIN"
+printf '%s\n' "$behind_commits"
+echo "BEHIND_COMMITS_END"
 
 if [[ -n "$status" ]]; then
   echo "WORKING_TREE_CLEAN=false"
