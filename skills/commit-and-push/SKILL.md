@@ -1,31 +1,33 @@
 ---
 name: commit-and-push
-description: 自动将全部本地变更提交并推送当前分支，全程无需用户确认；推送被拒绝时自动 merge 后重试，仅在发现敏感内容或合并冲突时停止
+description: 自动提交全部本地变更并推送当前分支，无需确认；推送被拒时自动 merge 重试，仅在发现敏感内容或合并冲突时停止
 disable-model-invocation: true
 user-invocable: true
-tools: Bash
+tools: Bash, Write
 ---
 
 ## 目标
 
-把全部本地变更自动形成一个 Conventional Commit 并推送到当前分支的 upstream。全程不做人工确认；推送被拒绝时自动 merge 远程变更后重试；只在发现敏感路径、凭证或合并冲突时停止并报告，由用户决定后续处理。
+把全部本地变更自动形成一个 Conventional Commit 并推送到当前分支的 upstream。除发现敏感内容、凭证或合并冲突外，不停止等待用户。
 
 ## 执行流程
 
+命令中的 `<skill-dir>` 指本 Skill 所在目录。
+
 ### 1. Preflight：固定提交和推送目标
 
-保持目标 Git 仓库为当前工作目录，使用当前已加载 Skill 的目录作为 `<skill-dir>`，执行：
+执行：
 
 ```bash
 bash "<skill-dir>/scripts/preflight.sh"
 ```
 
-记录脚本输出的 `CURRENT_BRANCH`、`PUSH_REMOTE`、`PUSH_BRANCH`、`HAS_UPSTREAM`、`UPSTREAM_REF`、工作区状态和 `PENDING_COMMITS`。脚本只读 Git 数据，不提交或推送。
+脚本只读 Git 数据，不提交或推送。记录输出的 `CURRENT_BRANCH`、`PUSH_REMOTE`、`PUSH_BRANCH`、`HAS_UPSTREAM`、`UPSTREAM_REF`、工作区状态和 `PENDING_COMMITS`。
 
 如果工作区干净且已有 upstream：
 
 - `PENDING_COMMITS` 为空：报告“无变更”并停止；
-- `PENDING_COMMITS` 非空：跳过暂存和提交步骤，直接进入推送步骤。
+- `PENDING_COMMITS` 非空：跳过步骤 2 和 3，直接进入步骤 4。
 
 如果工作区干净且没有 upstream，不创建空提交。
 
@@ -33,27 +35,15 @@ bash "<skill-dir>/scripts/preflight.sh"
 
 ### 2. 暂存全部变更并做安全检查
 
-先查看：
+执行：
 
 ```bash
 git status --short
-git --no-pager diff --cached --name-status
-git --no-pager diff --name-status
-```
-
-然后自动暂存全部变更：
-
-```bash
 git add -A
-```
-
-暂存完成后执行：
-
-```bash
 bash "<skill-dir>/scripts/inspect-staged.sh"
 ```
 
-脚本扫描阻止路径并输出 `STAGED_NAME_STATUS` 和 `STAGED_DIFF` 区段。阻止路径包括环境文件、凭证相关文件、私钥、日志、依赖、构建产物、备份和临时文件。发现阻止路径时停止，要求用户先移出这些路径或明确处理。读取完整 `STAGED_DIFF`，如果发现 API Key、密码、Token、私钥或其他凭证，列出文件和位置并停止流程，要求用户先移除或明确处理。
+脚本扫描阻止路径并输出 `STAGED_NAME_STATUS` 和 `STAGED_DIFF` 区段。发现阻止路径时停止，由用户决定处理方式。读取完整 `STAGED_DIFF`，发现 API Key、密码、Token、私钥或其他凭证时，列出文件和位置并停止，由用户决定处理方式。
 
 **完成条件**：暂存区包含全部本地变更，不含阻止路径；staged diff 中未发现凭证。
 
@@ -66,11 +56,14 @@ bash "<skill-dir>/scripts/inspect-staged.sh"
 - 第一行 subject 不超过 50 个字符；
 - 默认使用中文，除非用户要求英文。
 
-在同一个 Bash 调用中把 `commit_message` 设为生成的实际第一行并校验非空和长度，再执行：
+用 Write 工具把生成的实际第一行写入 `/tmp/git-commit-msg.txt`（写入前校验非空且不超过 50 个字符），然后执行：
 
 ```bash
-git commit -m "$commit_message"
+git commit -F /tmp/git-commit-msg.txt
+rm /tmp/git-commit-msg.txt
 ```
+
+文件方式让提交信息中的引号和特殊字符不经过 shell 转义，且兼容 bash、zsh 和 fish。
 
 提交失败或 Hook 修改工作区/暂存区时，停止自动重试，重新报告状态并等待用户处理。
 
@@ -84,7 +77,7 @@ git commit -m "$commit_message"
 bash "<skill-dir>/scripts/resolve-push-target.sh"
 ```
 
-脚本会重新解析当前分支和推送目标；有 upstream 时先执行 `git fetch <remote> <branch>`，再输出待推送提交、`REMOTE_AHEAD` 和远程领先的提交；没有 upstream 时输出首次推送所需的 `origin/<current_branch>`。记录 `CURRENT_BRANCH`、`PUSH_REMOTE`、`PUSH_BRANCH`、`PUSH_REMOTE_URL`、`PUSH_REFSPEC`、`HAS_UPSTREAM`、`IS_PROTECTED_BRANCH`、`REMOTE_AHEAD`、待推送提交和工作区状态。远程 URL 中的认证信息会被脚本遮蔽。
+脚本重新解析推送目标并刷新远程状态（有 upstream 时先 fetch；远程 URL 中的认证信息已遮蔽）。记录输出的 `CURRENT_BRANCH`、`PUSH_REMOTE`、`PUSH_BRANCH`、`PUSH_REMOTE_URL`、`PUSH_REFSPEC`、`HAS_UPSTREAM`、`IS_PROTECTED_BRANCH`、`REMOTE_AHEAD`、待推送提交和工作区状态。
 
 如果 `REMOTE_AHEAD=true`（远程有本地缺失的提交），先自动 merge 再推送：
 
@@ -130,3 +123,5 @@ bash "<skill-dir>/scripts/verify.sh"
 - 当前分支是否为 `main` 或 `master`；
 - 已提交文件；
 - Hook 产生或仍留在工作区的修改。
+
+**完成条件**：报告中包含上述全部五项。
