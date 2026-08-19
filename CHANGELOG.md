@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-08-19
+
 ### Fixed
 
 - **`branch-summary` Skill**：分支已通过 merge 提交合入主干后不再误报“没有已提交文件变更”，自动回退到合并前的主干作基准并输出 `BRANCH_MERGED`/`MERGE_COMMIT`；提交列表过滤同步主干产生的合并提交，避免噪音
