@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-08-19
+
 ### Fixed
 
 - **`commit-and-push` Skill**：当前分支没有 upstream 且工作区干净时不再误报“无变更”，回退到远程默认分支计算未推送提交（新增 `PENDING_BASE` 输出），存在未推送提交时直接以 `git push -u` 发布分支
