@@ -22,10 +22,10 @@ npx skills@latest add asiazhang/ai-flow-kit
 
 | Skill | 描述 |
 |-------|------|
-| `branch-summary` | 分析当前 Git 分支相对主干分支的变更，并总结修改原因 |
-| `clean-branches` | 检查并清理远程已删除的本地失效分支 |
-| `commit-and-push` | 暂存更改、生成提交信息并推送到远程仓库 |
-| `new-branch` | 将中文特性描述转换为英文分支名，并创建开发分支 |
+| `branch-summary` | 同步主干后分析当前分支的已提交变更，并总结修改意图 |
+| `clean-branches` | 确认后安全清理远程已删除的本地跟踪分支 |
+| `commit-and-push` | 确认暂存、提交和推送范围后提交并推送当前分支 |
+| `new-branch` | 确认分支名和基础分支后同步主干并创建开发分支 |
 
 ## 开发
 

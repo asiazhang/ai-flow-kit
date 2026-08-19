@@ -1,5 +1,20 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- **`branch-summary` Skill**：避免 fetch 到正在检出的本地主干，改用远程跟踪分支并增加仓库、远程和同步失败检查
+- **`clean-branches` Skill**：使用机器可读的 Git ref 信息识别失效分支，默认安全删除并避免误删当前分支或未合并提交
+- **`commit-and-push` Skill**：改用当前分支 upstream 判断未推送提交，增加暂存区凭证检查、混合修改处理和推送前确认，禁止自动 rebase
+- **`new-branch` Skill**：增加工作区和分支名校验，修复主分支切换失败及 `origin/HEAD` 可能拉错分支的问题
+
+### Changed
+
+- **执行流程统一**：四个 Skill 统一采用 `Preflight`、`Gate`、`Action`、`Verify` 和 `Report` 阶段，明确每一步的完成条件
+- **交互边界收紧**：提交、推送、删除分支、切换基础分支和创建新分支前增加明确确认门
+- **文档可执行性优化**：减少重复说明，固定变量作用域，明确未提交修改、远程目标和失败后的停止行为
+
 ## [1.0.2] - 2026-08-17
 
 ### Changed

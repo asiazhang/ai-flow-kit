@@ -1,81 +1,105 @@
 ---
 name: new-branch
-description: 交互式创建新的开发分支，自动将中文特性描述转换为英文分支名
+description: 根据用户确认的特性描述生成分支名，同步 main/master 后创建开发分支；会切换当前分支并修改本地分支引用
 disable-model-invocation: true
 user-invocable: true
-tools: Bash
+tools: Bash, AskUserQuestion
 ---
+
+## 目标
+
+在干净仓库中，从已同步的 `main` 或 `master` 创建一个新的 `dev/<description>` 分支。生成名称和基础分支后先请求确认，再执行切换和创建。
 
 ## 执行流程
 
-### 1. 定位 Git 仓库根目录
-首先确认当前目录位于 Git 仓库内，并获取仓库根目录。后续所有 Git 命令都必须以该目录为工作目录执行。
+### 1. Preflight：确认仓库可切换
+
+保持目标 Git 仓库为当前工作目录，使用当前已加载 Skill 的目录作为 `<skill-dir>`，执行：
 
 ```bash
-repo_root="$(git rev-parse --show-toplevel)" || {
-  echo "当前目录不在 Git 仓库内，请先进入一个 Git 仓库后重试。" >&2
+bash "<skill-dir>/scripts/preflight.sh"
+```
+
+脚本确认仓库根目录、工作区、进行中的 Git 操作和 `origin`。工作区必须为空；存在 merge、cherry-pick、revert、bisect 或 rebase 状态时停止。
+
+**完成条件**：已进入仓库根目录；工作区为空；没有进行中的 Git 操作；`origin` 可用。
+
+### 2. Name gate：生成并确认名称和基础分支
+
+向用户获取非空特性描述，生成英文 `description`：
+
+- 使用小写 kebab-case；
+- 包含动作和核心对象；
+- `description` 不超过 50 个字符；
+- 完整分支名为 `dev/$description`，不超过 63 个字符。
+
+使用实际生成的值验证：
+
+```bash
+branch_name="dev/$description"
+
+[ -n "$description" ] || {
+  echo "特性描述为空，已停止。" >&2
   exit 1
 }
-printf 'Git 仓库根目录: %s\n' "$repo_root"
+
+[ "${#branch_name}" -le 63 ] || {
+  echo "完整分支名超过 63 个字符，已停止。" >&2
+  exit 1
+}
+
+git check-ref-format --branch "$branch_name" >/dev/null || {
+  echo "生成的分支名不符合 Git ref 规则，已停止。" >&2
+  exit 1
+}
 ```
 
-将后续命令的工作目录切换到 `repo_root`；如果每条命令使用独立 Shell，则为每条命令添加 `cd "$repo_root" &&`，或使用 `git -C "$repo_root"`。
-
-完成条件：已成功获取绝对路径形式的 Git 仓库根目录；如果当前目录不是 Git 仓库，流程已停止并提示用户。
-
-### 2. 获取用户输入
-提示用户输入新特性的名称或描述，例如：
-- "用户认证系统"
-- "优化数据库查询性能"
-- "修复登录页面样式问题"
-
-### 3. 转换为英文描述
-将中文翻译为描述性的英文短语：
-- kebab-case 格式（单词用 `-` 连接），所有字母小写
-- 包含动词（如 optimize, fix, add）和核心对象，清晰表达变更意图
-- 控制在 50 个字符以内，优先保证清晰度，不过度简化
-
-转换示例：
-- "用户认证系统" → `add-user-authentication-system`
-- "优化数据库查询性能" → `optimize-database-query-performance`
-- "修复登录页面样式问题" → `fix-login-page-style-issues`
-- "优化UT初始化，将验证环节从推理环节分离出来" → `optimize-ut-initialization-separate-verification-from-inference`
-
-### 4. 切换并更新主分支
-在已定位的 Git 仓库根目录中执行：
+执行：
 
 ```bash
-# 尝试切换到 main 或 master 分支
-git checkout main 2>/dev/null || git checkout master 2>/dev/null
-
-# 确认当前已在主分支上
-git branch --show-current
-
-# 更新当前主分支
-git pull --ff-only origin HEAD
+bash "<skill-dir>/scripts/resolve-base.sh"
 ```
 
-### 5. 检查分支是否存在
+按脚本输出的 `BASE_BRANCH` 和 `BASE_IS_LOCAL` 确定基础分支。优先级为当前就在的 `main`/`master`、本地 `main`、本地 `master`、`origin/main`、`origin/master`、远程查询到的 `origin/main`、远程查询到的 `origin/master`。
+
+向用户展示并请求确认：
+
+- 生成的分支名；
+- 选定的基础分支；
+- 将同步 `origin/<base_branch>`，并可能切换当前分支。
+
+用户拒绝时停止；确认前不修改本地分支状态。
+
+**完成条件**：用户确认了合法的 `branch_name` 和 `base_branch`；确认前没有修改本地分支状态。
+
+### 3. Action：同步基础分支并创建
+
+用户确认后，在新的 Bash 调用中使用用户确认的实际值执行：
+
 ```bash
-git rev-parse --verify dev/<description>
+bash "<skill-dir>/scripts/create-branch.sh" \
+  --description '已确认的实际 description' \
+  --branch '已确认的实际 dev/branch-name' \
+  --base '已确认的实际 main 或 master'
 ```
 
-### 6. 创建新分支
-```bash
-git checkout -b dev/<description>
-```
+不得保留中文示例值。脚本会重新检查工作区和 Git 操作状态，确认本地和 `origin` 没有同名分支，刷新已确认的基础分支，用 `git merge --ff-only` 同步后创建并切换新分支。它只接受显式确认后的值，不重新生成名称，也不自动覆盖已有分支。
 
-### 7. 确认操作并停止
-报告以下信息：
-- 新分支名称
-- 源分支（main 或 master）
-- 切换状态
+**完成条件**：基础分支已 fast-forward 到 `origin/$base_branch`，并已创建 `branch_name`。
 
-输出确认后等待用户的下一步指令。在用户发出新指令前不执行任何额外操作。
+### 4. Verify：确认分支状态
 
-## 错误处理
+`create-branch.sh` 会输出 `CURRENT_BRANCH` 和 `WORKING_TREE_CLEAN`。确认当前分支是 `branch_name`，工作区为空，基础分支同步成功。
 
-- 如果分支已存在，提示用户选择是否覆盖或使用不同的名称
-- 如果当前 Git 状态不清洁（有未提交的更改），提示用户先提交或暂存变更
-- 如果 main/master 分支不存在，提示错误
-- 如果更新主分支失败（如存在冲突或远端不可达），提示用户先处理后再创建分支
+**完成条件**：当前分支是 `branch_name`，工作区为空，基础分支同步成功。
+
+### 5. Report：汇报
+
+报告：
+
+- 新分支名称；
+- 基础分支；
+- 基础分支来自本地还是 `origin`；
+- 当前分支和工作区状态。
+
+报告完成后停止，等待用户下一步指令。
