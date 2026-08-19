@@ -25,7 +25,7 @@ npx skills@latest add asiazhang/ai-flow-kit
 | `branch-summary` | 同步主干后分析当前分支的已提交变更，并总结修改意图 |
 | `clean-branches` | 确认后安全清理远程已删除的本地跟踪分支 |
 | `commit-and-push` | 自动提交全部本地变更并推送当前分支，无需确认；推送被拒时自动 merge 重试 |
-| `new-branch` | 确认分支名和基础分支后同步主干并创建开发分支 |
+| `new-branch` | 自动生成分支名并同步主干创建开发分支，无需确认；未提交修改自动暂存并在新分支恢复，未提供描述时询问一次 |
 
 ## 开发
 

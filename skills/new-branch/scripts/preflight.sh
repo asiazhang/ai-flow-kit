@@ -6,8 +6,8 @@ usage() {
 用法：
   preflight.sh
 
-确认仓库处于可切换状态：工作区干净、没有进行中的 Git 操作，
-并且 origin 可用。
+确认仓库处于可切换状态：没有进行中的 Git 操作，并且 origin 可用。
+工作区可以不为空，输出 WORKING_TREE_CLEAN 标记，脏工作区由后续步骤自动暂存。
 EOF
 }
 
@@ -27,11 +27,10 @@ repo_root="$(git rev-parse --show-toplevel)" || {
 }
 cd "$repo_root"
 
-status="$(git status --porcelain)"
-if [[ -n "$status" ]]; then
-  echo "工作区不干净，请先处理现有修改。" >&2
-  git status --short >&2
-  exit 1
+working_tree_clean=true
+if [[ -n "$(git status --porcelain)" ]]; then
+  echo "工作区不干净，创建分支时会自动暂存并在新分支上恢复。" >&2
+  working_tree_clean=false
 fi
 
 for operation in MERGE_HEAD CHERRY_PICK_HEAD REVERT_HEAD BISECT_LOG; do
@@ -58,6 +57,10 @@ git remote get-url origin >/dev/null 2>&1 || {
 }
 
 printf 'REPO_ROOT=%s\n' "$repo_root"
-echo "WORKING_TREE_CLEAN=true"
+if [[ "$working_tree_clean" == true ]]; then
+  echo "WORKING_TREE_CLEAN=true"
+else
+  echo "WORKING_TREE_CLEAN=false"
+fi
 echo "GIT_OPERATION_IN_PROGRESS=false"
 echo "ORIGIN_AVAILABLE=true"

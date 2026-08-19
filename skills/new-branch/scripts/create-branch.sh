@@ -87,11 +87,24 @@ repo_root="$(git rev-parse --show-toplevel)" || {
 }
 cd "$repo_root"
 
-if [[ -n "$(git status --porcelain)" ]]; then
-  echo "确认后工作区已变脏，请先处理现有修改。" >&2
-  git status --short >&2
-  exit 1
+stashed=false
+if ! git diff --quiet HEAD; then
+  git stash push -m "new-branch: 自动暂存，创建分支前" >/dev/null || {
+    echo "自动暂存本地修改失败，已停止。" >&2
+    exit 1
+  }
+  stashed=true
 fi
+# 未跟踪文件不参与 stash，会在切换分支时随工作区保留。
+
+restore_stash() {
+  if [[ "$stashed" == true ]]; then
+    git stash pop || {
+      echo "恢复暂存变更失败，stash 条目已保留，可用 git stash list 查看。" >&2
+      return 1
+    }
+  fi
+}
 
 for operation in MERGE_HEAD CHERRY_PICK_HEAD REVERT_HEAD BISECT_LOG; do
   operation_path="$(git rev-parse --git-path "$operation")"
@@ -124,6 +137,7 @@ fi
 
 git fetch --prune origin "$base_branch" >/dev/null || {
   echo "同步 origin/$base_branch 失败，已停止。" >&2
+  restore_stash || true
   exit 1
 }
 
@@ -131,29 +145,42 @@ if git show-ref --verify --quiet "refs/heads/$base_branch"; then
   base_source="local"
   git switch "$base_branch" || {
     echo "切换到 $base_branch 失败，已停止。" >&2
+    restore_stash || true
     exit 1
   }
 else
   base_source="origin"
   git switch -c "$base_branch" --track "origin/$base_branch" || {
     echo "无法从 origin/$base_branch 创建本地基础分支，已停止。" >&2
+    restore_stash || true
     exit 1
   }
 fi
 
 git merge --ff-only "origin/$base_branch" || {
   echo "$base_branch 无法 fast-forward 到 origin/$base_branch，已停止。" >&2
+  restore_stash || true
   exit 1
 }
 
 git switch -c "$branch_name" || {
   echo "创建 $branch_name 失败，已停止。" >&2
+  restore_stash || true
   exit 1
 }
 
-if [[ -n "$(git status --porcelain)" ]]; then
-  echo "创建分支后工作区不为空，已停止并保留当前状态。" >&2
-  git status --short >&2
+stash_restored=false
+if [[ "$stashed" == true ]]; then
+  git stash pop || {
+    echo "在新分支上恢复暂存变更时发生冲突，stash 条目已保留，可用 git stash list 查看，请手动解决。" >&2
+    exit 1
+  }
+  stash_restored=true
+fi
+
+if [[ "$stashed" == false && -n "$(git diff --name-only HEAD)" ]]; then
+  echo "创建分支后已跟踪文件出现修改，已停止并保留当前状态。" >&2
+  git diff --name-only HEAD >&2
   exit 1
 fi
 
@@ -162,4 +189,10 @@ printf 'BRANCH_NAME=%s\n' "$branch_name"
 printf 'BASE_BRANCH=%s\n' "$base_branch"
 printf 'BASE_SOURCE=%s\n' "$base_source"
 printf 'CURRENT_BRANCH=%s\n' "$(git branch --show-current)"
-echo "WORKING_TREE_CLEAN=true"
+printf 'STASH_USED=%s\n' "$stashed"
+printf 'STASH_RESTORED=%s\n' "$stash_restored"
+if [[ -z "$(git status --porcelain)" ]]; then
+  echo "WORKING_TREE_CLEAN=true"
+else
+  echo "WORKING_TREE_CLEAN=false"
+fi
