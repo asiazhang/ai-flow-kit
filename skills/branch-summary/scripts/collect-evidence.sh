@@ -31,7 +31,6 @@ repo_root="$(git rev-parse --show-toplevel)" || {
 cd "$repo_root"
 
 current_branch="$(git branch --show-current)"
-working_tree="$(git status --short)"
 
 if git remote get-url origin >/dev/null 2>&1; then
   git fetch --prune origin >/dev/null || {
@@ -81,15 +80,6 @@ printf 'BASE_REF=%s\n' "$base_ref"
 printf 'BRANCH_MERGED=%s\n' "$branch_merged"
 if [[ "$branch_merged" == true ]]; then
   printf 'MERGE_COMMIT=%s\n' "$merge_commit"
-fi
-
-if [[ -n "$working_tree" ]]; then
-  echo "WORKING_TREE_CLEAN=false"
-  echo "WORKING_TREE_BEGIN"
-  printf '%s\n' "$working_tree"
-  echo "WORKING_TREE_END"
-else
-  echo "WORKING_TREE_CLEAN=true"
 fi
 
 echo "COMMITS_BEGIN"
