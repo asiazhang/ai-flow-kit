@@ -50,6 +50,7 @@ if [[ -n "$upstream_remote" && "$upstream_remote" != "." && -n "$upstream_merge"
     echo "更新推送目标 $upstream_ref 失败，已停止。" >&2
     exit 1
   }
+  pending_base="$upstream_ref"
   pending_commits="$(git --no-pager log "$upstream_ref..HEAD" --oneline)"
   behind_commits="$(git --no-pager log "HEAD..$upstream_ref" --oneline)"
   if [[ -n "$behind_commits" ]]; then
@@ -67,7 +68,25 @@ else
     echo "找不到 $push_remote，已停止。" >&2
     exit 1
   }
-  pending_commits="$(git --no-pager log -1 --oneline HEAD)"
+  pending_base="$(git symbolic-ref -q "refs/remotes/$push_remote/HEAD" 2>/dev/null | sed 's|^refs/remotes/||' || true)"
+  if [[ -z "$pending_base" ]]; then
+    for candidate in main master; do
+      if git rev-parse -q --verify "refs/remotes/$push_remote/$candidate" >/dev/null 2>&1; then
+        pending_base="$push_remote/$candidate"
+        break
+      fi
+    done
+  fi
+  if [[ -n "$pending_base" ]]; then
+    base_branch="${pending_base#"$push_remote"/}"
+    git fetch -q "$push_remote" "$base_branch" >/dev/null 2>&1 || {
+      echo "更新基准分支 $pending_base 失败，已停止。" >&2
+      exit 1
+    }
+    pending_commits="$(git --no-pager log "$pending_base..HEAD" --oneline)"
+  else
+    pending_commits=""
+  fi
   behind_commits=""
   remote_ahead=false
 fi
@@ -94,6 +113,7 @@ else
   echo "IS_PROTECTED_BRANCH=false"
 fi
 
+printf 'PENDING_BASE=%s\n' "$pending_base"
 echo "PENDING_COMMITS_BEGIN"
 printf '%s\n' "$pending_commits"
 echo "PENDING_COMMITS_END"

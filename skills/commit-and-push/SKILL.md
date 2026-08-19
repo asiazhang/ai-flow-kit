@@ -22,14 +22,14 @@ tools: Bash, Write
 bash "<skill-dir>/scripts/preflight.sh"
 ```
 
-脚本只读 Git 数据，不提交或推送。记录输出的 `CURRENT_BRANCH`、`PUSH_REMOTE`、`PUSH_BRANCH`、`HAS_UPSTREAM`、`UPSTREAM_REF`、工作区状态和 `PENDING_COMMITS`。
+脚本只读 Git 数据，不提交或推送。记录输出的 `CURRENT_BRANCH`、`PUSH_REMOTE`、`PUSH_BRANCH`、`HAS_UPSTREAM`、`UPSTREAM_REF`、`PENDING_BASE`、工作区状态和 `PENDING_COMMITS`。
 
-如果工作区干净且已有 upstream：
+`PENDING_BASE` 是待推送提交的比较基准：有 upstream 时为 upstream 跟踪分支；没有 upstream 时回退到远程默认分支（通常是 `origin/main`）。
 
-- `PENDING_COMMITS` 为空：报告“无变更”并停止；
-- `PENDING_COMMITS` 非空：跳过步骤 2 和 3，直接进入步骤 4。
+如果工作区干净：
 
-如果工作区干净且没有 upstream，不创建空提交。
+- `PENDING_COMMITS` 为空：报告“无变更”并停止，不创建空提交；
+- `PENDING_COMMITS` 非空：跳过步骤 2 和 3，直接进入步骤 4。没有 upstream 的分支会在步骤 4 中用 `git push -u` 首次发布。
 
 **完成条件**：当前是具名分支；已固定唯一的推送目标；已记录工作区和 upstream 状态。
 
@@ -77,7 +77,7 @@ rm /tmp/git-commit-msg.txt
 bash "<skill-dir>/scripts/resolve-push-target.sh"
 ```
 
-脚本重新解析推送目标并刷新远程状态（有 upstream 时先 fetch；远程 URL 中的认证信息已遮蔽）。记录输出的 `CURRENT_BRANCH`、`PUSH_REMOTE`、`PUSH_BRANCH`、`PUSH_REMOTE_URL`、`PUSH_REFSPEC`、`HAS_UPSTREAM`、`IS_PROTECTED_BRANCH`、`REMOTE_AHEAD`、待推送提交和工作区状态。
+脚本重新解析推送目标并刷新远程状态（有 upstream 时先 fetch；远程 URL 中的认证信息已遮蔽）。记录输出的 `CURRENT_BRANCH`、`PUSH_REMOTE`、`PUSH_BRANCH`、`PUSH_REMOTE_URL`、`PUSH_REFSPEC`、`HAS_UPSTREAM`、`IS_PROTECTED_BRANCH`、`REMOTE_AHEAD`、`PENDING_BASE`、待推送提交和工作区状态。
 
 如果 `REMOTE_AHEAD=true`（远程有本地缺失的提交），先自动 merge 再推送：
 

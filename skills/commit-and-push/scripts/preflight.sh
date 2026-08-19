@@ -90,7 +90,23 @@ else
 fi
 
 if [[ "$has_upstream" == true ]]; then
-  pending_commits="$(git --no-pager log "$upstream_ref..HEAD" --oneline)"
+  pending_base="$upstream_ref"
+else
+  pending_base="$(git symbolic-ref -q "refs/remotes/$push_remote/HEAD" 2>/dev/null | sed 's|^refs/remotes/||' || true)"
+  if [[ -z "$pending_base" ]]; then
+    for candidate in main master; do
+      if git rev-parse -q --verify "refs/remotes/$push_remote/$candidate" >/dev/null 2>&1; then
+        pending_base="$push_remote/$candidate"
+        break
+      fi
+    done
+  fi
+fi
+
+printf 'PENDING_BASE=%s\n' "$pending_base"
+
+if [[ -n "$pending_base" ]]; then
+  pending_commits="$(git --no-pager log "$pending_base..HEAD" --oneline)"
 else
   pending_commits=""
 fi
