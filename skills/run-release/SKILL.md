@@ -3,35 +3,18 @@ name: run-release
 description: 发布项目新版本：探测项目约定、计算语义化版本号、更新版本元数据与 CHANGELOG、校验发布前置状态、提交并打标签（不推送，留用户 review 后自行推送）
 disable-model-invocation: true
 user-invocable: true
-tools: Bash, Write, AskUserQuestion
+tools: Bash, Edit
 ---
 
 ## 目标
 
-把当前变更发布为新版本，适用于任意 Git 项目。通过 `detect-project.sh` 自动探测项目约定（当前版本、CHANGELOG 路径与样式、主干分支、tag 前缀），必要时用 `.run-release.json` 覆盖。发布关键动作（提交、打标签）停下确认；**不推送**，让用户在本地 review 后自行推送，留出修复窗口。
+把当前变更发布为新版本，适用于任意 Git 项目。通过 `detect-project.sh` 自动探测项目约定，必要时用 `.run-release.json` 覆盖。版本号判定、提交、打标签等关键动作停下确认；**不推送**，让用户在本地 review 后自行推送，留出修复窗口。
 
-**版本模型**：git tag 是版本唯一真值——当前版本一律从最近 tag 读；版本文件（若有）只用于"写入"、不用于"读取"，且只在 `.run-release.json` 显式配置 `versionFiles` 时才更新与校验，不自动探测。
+**版本模型**：git tag 是版本唯一来源——当前版本一律从最近 tag 读，版本文件不参与读取；版本文件只在 `.run-release.json` 配置 `versionFiles` 时写入与校验。
 
 ## 执行流程
 
-命令中的 `<skill-dir>` 指本 Skill 所在目录。整个流程分为五个阶段：`Preflight` → `Gate` → `Action` → `Verify` → `Report`。
-
-本 Skill 的附加文件按目录组织：`scripts/` 是可执行脚本（直接调用），`references/` 是附加文档（按需查阅），`assets/` 是静态模板。目录结构：
-
-```
-run-release/
-├── SKILL.md                          # 元数据 + 指令
-├── scripts/                          # 可执行代码
-│   ├── detect-project.sh
-│   ├── preflight.sh
-│   ├── collect-changes.sh
-│   ├── next-version.sh
-│   └── verify-release.sh
-├── references/                       # 附加文档
-│   └── CONFIG.example.md             # .run-release.json 配置字段说明
-└── assets/                           # 静态模板
-    └── changelog-template.md         # CHANGELOG 条目模板
-```
+命令中的 `<skill-dir>` 指本 Skill 所在目录。附加文件按目录组织：`scripts/` 是可执行脚本（直接调用），`references/` 是附加文档（按需查阅），`assets/` 是静态模板。
 
 ### 1. Preflight：探测约定并检查前置状态
 
@@ -43,10 +26,10 @@ bash "<skill-dir>/scripts/detect-project.sh"
 
 脚本只读，输出 `REPO_ROOT`、`CURRENT_VERSION`、`VERSION_FILES`、`CHANGELOG`、`CHANGELOG_STYLE`、`TRUNK_BRANCH`、`TAG_PREFIX`、`TEST_COMMAND`、`POST_UPDATE_COMMAND`。这些输出是后续所有步骤的**唯一事实来源**；若根目录存在 `.run-release.json`，其字段在探测阶段合并覆盖（字段说明见 [references/CONFIG.example.md](references/CONFIG.example.md)）。
 
-- `CURRENT_VERSION` 从最近 tag 读（tag 是唯一真值）；无 tag 视为首版 `0.0.0`。
-- `VERSION_FILES` 是 `.run-release.json` 显式配置的版本文件列表（`路径:类型`），未配置则为空（版本只存在于 tag）。
+- 无 tag 时 `CURRENT_VERSION` 视为首版 `0.0.0`。
+- `VERSION_FILES` 是版本文件列表（`路径:类型`），未配置则为空。
 
-若 `CHANGELOG` 为空（没有可识别的 CHANGELOG），停下询问用户：版本条目写到哪里，再继续。
+若 `CHANGELOG` 为空或 `CHANGELOG_STYLE=none`（没有可识别的 CHANGELOG），停下询问用户：版本条目写到哪里，再继续。
 
 然后执行前置检查：
 
@@ -78,9 +61,7 @@ bash "<skill-dir>/scripts/next-version.sh" --current '<当前版本>' --bump '<m
 
 ### 3. Action：更新版本文件与 CHANGELOG
 
-用 Edit 工具修改文件：
-
-- **版本文件**（`VERSION_FILES`，`路径:类型`，可为空）：按类型改版本号——`json` 改 JSON 的 `"version"` 字段，`toml` 改 TOML 的 `version` 行，`text` 替换 `<VERSION>` 占位符。为空时**跳过本项**（版本只存在于 tag）。
+- **版本文件**（`VERSION_FILES`）：按类型改版本号——`json` 改 JSON 的 `"version"` 字段，`toml` 改 TOML 的 `version` 行，`text` 替换 `<VERSION>` 占位符。为空时**跳过本项**。
 - **CHANGELOG**（`CHANGELOG`）：条目格式以 [assets/changelog-template.md](assets/changelog-template.md) 为准（不探测项目自带模板）。`CHANGELOG_STYLE` 为 `unreleased` 时，把顶部 `## [Unreleased]` 改名为 `## [<目标版本>] - <当天日期>`；为 `top-insert` 时，在标题之后、现有条目之前插入新版本条目 `## [<目标版本>] - <当天日期>`。下面按本次对使用者可见的变更填写分类（Added / Changed / Deprecated / Removed / Fixed / Security），每类条目以 `- **<模块>**：<变更描述>` 格式编写，只保留有内容的分类。
 
 如果版本文件或 CHANGELOG 需要更新但无法编辑（如二进制、锁定文件），停下报告，由用户处理。
@@ -112,7 +93,7 @@ bash "<skill-dir>/scripts/verify-release.sh" --version '<目标版本>' \
 
 **完成条件**：`VERIFY_RESULT=PASS`，且没有未处理的 `FAIL`；若传了 `--command`，发布前命令已通过。
 
-### 5. Action：提交与打标签（不推送）
+### 5. Action：提交与打标签
 
 向用户确认要提交并打标签后，在**同一个** Bash 调用中执行（保持状态一致）：
 
@@ -122,13 +103,13 @@ git commit -m "<提交信息>"
 git tag "<tag 前缀><目标版本>"
 ```
 
-提交信息默认 `release: <目标版本>`（对齐仓库既有提交历史；可让用户指定）。先提交、再打标签。**不执行 `git push`**，留给用户在 review 后自行推送。若提交或打标签失败，停止并报告，不自动重试。
+提交信息默认 `release: <目标版本>`（可让用户指定）。先提交、再打标签。**不执行 `git push`**，留给用户在 review 后自行推送。
 
-**完成条件**：提交、打标签均成功；tag 名是 `<tag 前缀><目标版本>`。tag 本身即是版本记录。
+**完成条件**：提交、打标签均成功；tag 名是 `<tag 前缀><目标版本>`。
 
 ### 6. Report：汇报
 
-报告：目标版本号、`CHANGELOG` 新增条目的摘要、提交哈希、tag 名，并明确提示**本次未推送**，给出后续命令 `git push && git push --tags`；提示推送前发现问题可直接修复（新增提交、删除并重打本地 tag）。若本次变更新增了 Skill/功能或改了对外接口，提示"可在干净测试项目验证发布"。
+报告：目标版本号、`CHANGELOG` 新增条目的摘要、提交哈希、tag 名，并明确提示**本次未推送**，给出后续命令 `git push && git push --tags`；提示推送前发现问题可直接修复。若本次变更新增了 Skill/功能或改了对外接口，提示"可在干净测试项目验证发布"。
 
 **完成条件**：报告中包含以上各项。
 

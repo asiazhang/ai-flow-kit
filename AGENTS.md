@@ -37,4 +37,4 @@ git status --short
 
 面向用户的变更记录在 `CHANGELOG.md` 中维护。发布时遵循 [SemVer](https://semver.org/) 并创建对应的 Git tag，同步 `.claude-plugin/plugin.json` 中的版本号。
 
-发布前先读 [`docs/guides/release-process.md`](docs/guides/release-process.md)，按其执行完整发布流程。
+发布前先读 [`skills/run-release/SKILL.md`](skills/run-release/SKILL.md)，按其执行完整发布流程。

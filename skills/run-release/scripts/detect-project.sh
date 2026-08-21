@@ -20,11 +20,6 @@ if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
   exit 0
 fi
 
-# --from-tags 已废弃（版本默认就从 tag 读），保留参数名以兼容旧调用，不报错。
-if [[ "${1:-}" == "--from-tags" ]]; then
-  shift
-fi
-
 if [[ $# -gt 0 ]]; then
   echo "不支持的位置参数。使用 --help 查看用法。" >&2
   exit 2
@@ -110,6 +105,7 @@ else
   done
 fi
 
+# changelog 为空时保持 none（SKILL.md 步骤 1 要求停下询问用户），不自行回退到 top-insert
 changelog_style="none"
 if [[ -n "$changelog" && -f "$changelog" ]]; then
   if grep -q '^## \[Unreleased\]' "$changelog"; then
