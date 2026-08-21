@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- **`run-release` Skill**：减少人工介入——版本号改为按约定式提交自动判定（新增 `bump-recommend.sh`，支持 `BREAKING CHANGE`/`!`/`feat`/常规类型/无前缀提交）；提交与打标签等本地动作自动执行，仅 **push 前确认一次**；新增可选 `autoPush` 配置（默认 false），开启后自动推送、全程无确认
+
 ## [1.2.0] - 2026-08-21
 
 ### Added

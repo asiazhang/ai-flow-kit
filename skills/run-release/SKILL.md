@@ -1,6 +1,6 @@
 ---
 name: run-release
-description: 发布项目新版本：探测项目约定、计算语义化版本号、更新版本元数据与 CHANGELOG、校验发布前置状态、提交并打标签（不推送，留用户 review 后自行推送）
+description: 发布项目新版本：探测项目约定、按约定式提交自动判定版本号、更新版本元数据与 CHANGELOG、校验发布前置状态、提交并打标签（本地动作自动执行，仅 push 前确认一次；可配置 autoPush 跳过确认自动推送）
 disable-model-invocation: true
 user-invocable: true
 tools: Bash, Edit
@@ -8,7 +8,7 @@ tools: Bash, Edit
 
 ## 目标
 
-把当前变更发布为新版本，适用于任意 Git 项目。通过 `detect-project.sh` 自动探测项目约定，必要时用 `.run-release.json` 覆盖。版本号判定、提交、打标签等关键动作停下确认；**不推送**，让用户在本地 review 后自行推送，留出修复窗口。
+把当前变更发布为新版本，适用于任意 Git 项目。通过 `detect-project.sh` 自动探测项目约定，必要时用 `.run-release.json` 覆盖。提交与打标签等本地动作**自动执行**，仅 push 前确认一次（影响远程）；或在 `.run-release.json` 配置 `autoPush` 实现全程无确认。
 
 **版本模型**：git tag 是版本唯一来源——当前版本一律从最近 tag 读，版本文件不参与读取；版本文件只在 `.run-release.json` 配置 `versionFiles` 时写入与校验。
 
@@ -24,7 +24,7 @@ tools: Bash, Edit
 bash "<skill-dir>/scripts/detect-project.sh"
 ```
 
-脚本只读，输出 `REPO_ROOT`、`CURRENT_VERSION`、`VERSION_FILES`、`CHANGELOG`、`CHANGELOG_STYLE`、`TRUNK_BRANCH`、`TAG_PREFIX`、`TEST_COMMAND`、`POST_UPDATE_COMMAND`。这些输出是后续所有步骤的**唯一事实来源**；若根目录存在 `.run-release.json`，其字段在探测阶段合并覆盖（字段说明见 [references/CONFIG.example.md](references/CONFIG.example.md)）。
+脚本只读，输出 `REPO_ROOT`、`CURRENT_VERSION`、`VERSION_FILES`、`CHANGELOG`、`CHANGELOG_STYLE`、`TRUNK_BRANCH`、`TAG_PREFIX`、`TEST_COMMAND`、`POST_UPDATE_COMMAND`、`AUTO_PUSH`。这些输出是后续所有步骤的**唯一事实来源**；若根目录存在 `.run-release.json`，其字段在探测阶段合并覆盖（字段说明见 [references/CONFIG.example.md](references/CONFIG.example.md)）。
 
 - 无 tag 时 `CURRENT_VERSION` 视为首版 `0.0.0`。
 - `VERSION_FILES` 是版本文件列表（`路径:类型`），未配置则为空。
@@ -41,23 +41,26 @@ bash "<skill-dir>/scripts/preflight.sh" --trunk '<主干分支>'
 
 **完成条件**：已固定唯一目标——当前版本（tag）、CHANGELOG 路径、主干分支、tag 前缀；`PREFLIGHT_RESULT=PASS`。
 
-### 2. Gate：收集变更、确定版本号
+### 2. Gate：收集变更、自动判定版本号
 
 执行：
 
 ```bash
 bash "<skill-dir>/scripts/collect-changes.sh" --since-tag
+bash "<skill-dir>/scripts/bump-recommend.sh" --since-tag
 ```
 
-脚本只读，输出自最近 tag 以来的变更事实（提交列表、变更文件、diff stat），不输出 bump 建议。agent 据此按语义化规则判定递增 `major`、`minor` 还是 `patch`（Bug 修复/内部重构/文档 → PATCH；新增功能/新增 Skill → MINOR；破坏性变更 → MAJOR），再计算目标版本：
+两个脚本都只读。`collect-changes.sh` 输出自最近 tag 以来的变更事实（提交列表、变更文件、diff stat）；`bump-recommend.sh` 按**约定式提交**（Conventional Commits）规则自动判定递增建议：`BREAKING CHANGE`/`!` → MAJOR，`feat` → MINOR，其余类型（fix/docs/chore 等）→ PATCH，无前缀提交按 PATCH 保守处理并 WARN 提醒。
+
+以 `SUGGESTED_BUMP` 为准（major > minor > patch 优先），对照 `collect-changes.sh` 的变更事实复核是否符合直觉（尤其 `major` 建议和未识别前缀提交，见 WARN），有异议才改，然后计算目标版本：
 
 ```bash
-bash "<skill-dir>/scripts/next-version.sh" --current '<当前版本>' --bump '<major|minor|patch>'
+bash "<skill-dir>/scripts/next-version.sh" --current '<当前版本>' --bump '<SUGGESTED_BUMP>'
 ```
 
-把目标版本号**连同判定依据**（变更事实摘要）交用户确认，用户拒绝则重新判定。
+目标版本号与判定依据（命中的提交）**记录待步骤 5 推送确认时一并展示**，本步骤不单独停下等确认。
 
-**完成条件**：已与用户确认目标版本号及判定依据，且它符合语义化版本规则。
+**完成条件**：已确定目标版本号，且它符合语义化版本规则；判定依据（命中提交）已记录待步骤 5 展示。
 
 ### 3. Action：更新版本文件与 CHANGELOG
 
@@ -93,9 +96,9 @@ bash "<skill-dir>/scripts/verify-release.sh" --version '<目标版本>' \
 
 **完成条件**：`VERIFY_RESULT=PASS`，且没有未处理的 `FAIL`；若传了 `--command`，发布前命令已通过。
 
-### 5. Action：提交与打标签
+### 5. Action：提交并打标签（自动），确认后才推送
 
-向用户确认要提交并打标签后，在**同一个** Bash 调用中执行（保持状态一致）：
+**本地动作无需确认**：提交与打标签随时可删、可重打，直接自动执行。在**同一个** Bash 调用中执行（保持状态一致）：
 
 ```bash
 git add -A
@@ -103,17 +106,25 @@ git commit -m "<提交信息>"
 git tag "<tag 前缀><目标版本>"
 ```
 
-提交信息默认 `release: <目标版本>`（可让用户指定）。先提交、再打标签。**不执行 `git push`**，留给用户在 review 后自行推送。
+提交信息默认 `release: <目标版本>`（可让用户指定）。先提交、再打标签。
 
-**完成条件**：提交、打标签均成功；tag 名是 `<tag 前缀><目标版本>`。
+**只有 push 需要人工确认**（影响远程）：向用户展示目标版本号、判定依据（bump-recommend.sh 命中的提交 + collect-changes.sh 摘要）并确认是否推送。用户确认后，在**同一个** Bash 调用中执行：
+
+```bash
+git push && git push --tags
+```
+
+若 `AUTO_PUSH=true`（`.run-release.json` 已配置），跳过确认直接推送。推送失败则停下报告（此时提交与 tag 已在本地，可修复后重推）。
+
+**完成条件**：提交、打标签均成功；tag 名是 `<tag 前缀><目标版本>`；推送已确认（或 `AUTO_PUSH=true`）且成功。
 
 ### 6. Report：汇报
 
-报告：目标版本号、`CHANGELOG` 新增条目的摘要、提交哈希、tag 名，并明确提示**本次未推送**，给出后续命令 `git push && git push --tags`；提示推送前发现问题可直接修复。若本次变更新增了 Skill/功能或改了对外接口，提示"可在干净测试项目验证发布"。
+报告：目标版本号、`CHANGELOG` 新增条目的摘要、提交哈希、tag 名。若已推送，说明已推送；否则明确提示**本次未推送**（等待确认或用户自行推送），给出后续命令 `git push && git push --tags`，并提示推送前发现问题可直接修复。若本次变更新增了 Skill/功能或改了对外接口，提示"可在干净测试项目验证发布"。
 
 **完成条件**：报告中包含以上各项。
 
 ## 失败与回滚
 
 - 任一步骤失败：停止并报告当前状态，不自动回滚、不自动重试
-- 由于不推送，发现问题时用户有本地修复窗口：未推送前可直接修复后重新提交、删除并重打本地 tag（`git tag -d <tag>` 再重新 `git tag`）
+- 由于 push 前已确认，未推送或推送失败时用户有本地修复窗口：可直接修复后重新提交、删除并重打本地 tag（`git tag -d <tag>` 再重新 `git tag`），再重推

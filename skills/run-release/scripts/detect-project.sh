@@ -7,7 +7,7 @@ usage() {
   detect-project.sh
 
 探测项目发布相关约定：当前版本（从最近 tag 读）、CHANGELOG 路径与样式、
-主干分支、git tag 前缀、可选版本文件列表。只读，不修改任何文件。
+主干分支、git tag 前缀、可选版本文件列表、是否自动推送。只读，不修改任何文件。
 
 版本读取：一律从最近的语义化版本 tag 推导，tag 是版本唯一真值；无 tag 视为
 首版（0.0.0）。版本文件（若有）只用于“写入”，不用于“读取”，且只在
@@ -32,7 +32,7 @@ repo_root="$(git rev-parse --show-toplevel)" || {
 cd "$repo_root"
 
 # --- 读取 .run-release.json（可选，只读一次，作为配置来源） ---
-cfg_version_files=""; cfg_changelog=""; cfg_tag_prefix=""; cfg_trunk=""; cfg_pre_cmd=""; cfg_post_cmd=""
+cfg_version_files=""; cfg_changelog=""; cfg_tag_prefix=""; cfg_trunk=""; cfg_pre_cmd=""; cfg_post_cmd=""; cfg_auto_push=""
 if [[ -f .run-release.json ]]; then
   cfg="$(python3 - <<'PY'
 import json
@@ -67,6 +67,7 @@ print('cfg_tag_prefix=%r' % s('tagPrefix'))
 print('cfg_trunk=%r' % s('trunkBranch'))
 print('cfg_pre_cmd=%r' % s('preReleaseCommand'))
 print('cfg_post_cmd=%r' % s('postUpdateCommand'))
+print('cfg_auto_push=%r' % ('true' if d.get('autoPush') is True else 'false'))
 PY
 )"
   eval "$cfg"
@@ -141,6 +142,12 @@ fi
 
 post_update_command="$cfg_post_cmd"
 
+# 是否自动推送：配置 autoPush=true 才推送，默认 false（人工 review 后自行推送）
+auto_push="false"
+if [[ "$cfg_auto_push" == "true" ]]; then
+  auto_push="true"
+fi
+
 printf 'REPO_ROOT=%s\n' "$repo_root"
 printf 'CURRENT_VERSION=%s\n' "$current_version"
 printf 'VERSION_FILES=%s\n' "$cfg_version_files"
@@ -150,3 +157,4 @@ printf 'TRUNK_BRANCH=%s\n' "$trunk_branch"
 printf 'TAG_PREFIX=%s\n' "$tag_prefix"
 printf 'TEST_COMMAND=%s\n' "$test_command"
 printf 'POST_UPDATE_COMMAND=%s\n' "$post_update_command"
+printf 'AUTO_PUSH=%s\n' "$auto_push"

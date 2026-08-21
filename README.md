@@ -26,7 +26,7 @@ npx skills@latest add asiazhang/ai-flow-kit
 | `clean-branches` | 确认后安全清理远程已删除的本地跟踪分支 |
 | `commit-and-push` | 自动提交全部本地变更并推送当前分支，无需确认；推送被拒时自动 merge 重试 |
 | `new-branch` | 自动生成分支名并同步主干创建开发分支，无需确认；未提交修改自动暂存并在新分支恢复，未提供描述时询问一次 |
-| `run-release` | 按发布流程发布新版本：计算版本号、更新 CHANGELOG/plugin.json、校验前置状态、提交并打标签（不推送，留用户 review 后自行推送） |
+| `run-release` | 按发布流程发布新版本：按约定式提交自动判定版本号、更新 CHANGELOG/plugin.json、校验前置状态、提交并打标签（本地动作自动执行，仅 push 前确认一次；可配置 autoPush 跳过确认） |
 
 ## 开发
 

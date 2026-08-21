@@ -15,7 +15,8 @@
   "tagPrefix": "v",
   "trunkBranch": "main",
   "preReleaseCommand": "make check",
-  "postUpdateCommand": "bash scripts/check-skills-consistency.sh"
+  "postUpdateCommand": "bash scripts/check-skills-consistency.sh",
+  "autoPush": true
 }
 ```
 
@@ -29,6 +30,7 @@
 | `trunkBranch` | `main` 或 `master` | 发布要求所在的主干分支 |
 | `preReleaseCommand` | 探测到的测试命令（npm test / pytest / cargo test / make test） | 编辑后校验阶段运行的命令，失败则停止 |
 | `postUpdateCommand` | 无 | 编辑版本文件与 CHANGELOG 后执行的任意命令（如校验 README/清单一致性），失败则停止 |
+| `autoPush` | `false` | 是否在提交并打标签后自动执行 `git push && git push --tags`（跳过人工确认）；默认 `false` 时仍会在 push 前确认一次
 
 ### `versionFiles` 的 `kind` 取值
 
@@ -46,3 +48,4 @@
 - 该配置是**可选**的：大多数项目（CHANGELOG.md + main 分支，版本只存在于 tag）无需配置即可直接使用。
 - 配置文件不要求存在；不存在时 skill 完全依赖自动探测。
 - CHANGELOG 条目格式固定使用 skill 内建模板 `skills/run-release/assets/changelog-template.md`，不探测项目自带模板。
+- `autoPush` 默认关闭：提交与打标签自动执行，仅 push 前保留一次确认；需要 CI 一键发布时再开启。
