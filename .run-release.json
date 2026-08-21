@@ -1,0 +1,9 @@
+{
+  "versionFiles": [
+    ".claude-plugin/plugin.json"
+  ],
+  "changelog": "CHANGELOG.md",
+  "tagPrefix": "v",
+  "trunkBranch": "main",
+  "postUpdateCommand": "bash scripts/check-skills-consistency.sh"
+}

@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- **`run-release` Skill**：新增发布 Skill，按 `docs/guides/release-process.md` 自动化发布流程——计算语义化版本号、更新 CHANGELOG/plugin.json/README、校验发布前置状态、提交并打标签推送；配套 `next-version.sh` 和 `verify-release.sh` 脚本
+
 ## [1.1.2] - 2026-08-19
 
 ### Fixed
