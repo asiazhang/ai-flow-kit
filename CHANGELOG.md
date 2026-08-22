@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.2] - 2026-08-22
+
+### Fixed
+
+- **`run-release` Skill**：修复 `detect-project.sh` 在 macOS BSD sed 下无法解析版本 tag（BRE `\+` 量词无效），改用 POSIX ERE（`sed -nE`）；`preflight.sh`、`verify-release.sh` 同步加固变量引用，toml 版本解析统一改用 ERE
+- **各 Skill 脚本**：统一加固变量引用（`$var` → `${var}`）与数组展开（`${arr[@]+"${arr[@]}"}`），兼容 `set -u` 与空数组场景；`clean-branches` 的 `discover-gone.sh` 改为显式 `bash` 调用，避免依赖可执行位
+
 ## [1.2.1] - 2026-08-21
 
 ### Changed
