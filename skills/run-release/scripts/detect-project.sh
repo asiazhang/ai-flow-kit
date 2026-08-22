@@ -78,7 +78,7 @@ current_version=""
 tag_prefix=""
 recent_tag="$(git describe --tags --abbrev=0 2>/dev/null || true)"
 if [[ -n "$recent_tag" ]]; then
-  v="$(printf '%s' "$recent_tag" | sed -n 's/.*\([0-9]\+\.[0-9]\+\.[0-9]\+\).*/\1/p')"
+  v="$(printf '%s\n' "$recent_tag" | sed -nE 's/.*([0-9]+\.[0-9]+\.[0-9]+).*/\1/p')"
   if [[ -n "$v" ]]; then
     current_version="$v"
     tag_prefix="$(printf '%s' "$recent_tag" | sed -E 's/[0-9]+\.[0-9]+\.[0-9]+$//')"

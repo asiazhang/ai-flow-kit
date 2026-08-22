@@ -36,7 +36,7 @@ fi
 for operation in MERGE_HEAD CHERRY_PICK_HEAD REVERT_HEAD BISECT_LOG; do
   operation_path="$(git rev-parse --git-path "$operation")"
   if [[ -e "$operation_path" ]]; then
-    echo "仓库存在进行中的 Git 操作：$operation，已停止。" >&2
+    echo "仓库存在进行中的 Git 操作：${operation}，已停止。" >&2
     exit 1
   fi
 done

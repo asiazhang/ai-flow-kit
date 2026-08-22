@@ -47,7 +47,7 @@ if [[ "${#expected_branches[@]}" -eq 0 ]]; then
 fi
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-actual_output="$("$script_dir/discover-gone.sh")"
+actual_output="$(bash "$script_dir/discover-gone.sh")"
 actual_branches=()
 in_gone_branches=false
 while IFS= read -r line; do
@@ -61,7 +61,7 @@ while IFS= read -r line; do
 done <<< "$actual_output"
 
 expected_sorted="$(printf '%s\n' "${expected_branches[@]}" | LC_ALL=C sort)"
-actual_sorted="$(printf '%s\n' "${actual_branches[@]}" | LC_ALL=C sort)"
+actual_sorted="$(printf '%s\n' ${actual_branches[@]+"${actual_branches[@]}"} | LC_ALL=C sort)"
 
 if [[ "$expected_sorted" != "$actual_sorted" ]]; then
   echo "确认后的候选列表已变化，未执行任何删除。" >&2
@@ -69,7 +69,7 @@ if [[ "$expected_sorted" != "$actual_sorted" ]]; then
   printf '%s\n' "${expected_branches[@]}" >&2
   echo "EXPECTED_BRANCHES_END" >&2
   echo "ACTUAL_BRANCHES_BEGIN" >&2
-  printf '%s\n' "${actual_branches[@]}" >&2
+  printf '%s\n' ${actual_branches[@]+"${actual_branches[@]}"} >&2
   echo "ACTUAL_BRANCHES_END" >&2
   exit 3
 fi

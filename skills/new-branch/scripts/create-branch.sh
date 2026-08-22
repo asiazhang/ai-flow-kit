@@ -109,7 +109,7 @@ restore_stash() {
 for operation in MERGE_HEAD CHERRY_PICK_HEAD REVERT_HEAD BISECT_LOG; do
   operation_path="$(git rev-parse --git-path "$operation")"
   if [[ -e "$operation_path" ]]; then
-    echo "仓库存在进行中的 Git 操作：$operation，已停止。" >&2
+    echo "仓库存在进行中的 Git 操作：${operation}，已停止。" >&2
     exit 1
   fi
 done
@@ -158,7 +158,7 @@ else
 fi
 
 git merge --ff-only "origin/$base_branch" || {
-  echo "$base_branch 无法 fast-forward 到 origin/$base_branch，已停止。" >&2
+  echo "$base_branch 无法 fast-forward 到 origin/${base_branch}，已停止。" >&2
   restore_stash || true
   exit 1
 }

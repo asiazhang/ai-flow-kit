@@ -58,7 +58,7 @@ else
 fi
 
 git rev-parse --verify "$base_ref^{commit}" >/dev/null || {
-  echo "无法解析比较基准 $base_ref，已停止。" >&2
+  echo "无法解析比较基准 ${base_ref}，已停止。" >&2
   exit 1
 }
 

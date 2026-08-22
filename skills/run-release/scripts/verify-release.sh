@@ -78,7 +78,7 @@ file_version() {
   fi
   case "$k" in
     json) python3 -c "import json,sys;print(json.load(open(sys.argv[1])).get('version',''))" "$f" 2>/dev/null || true ;;
-    toml) grep -m1 '^version' "$f" 2>/dev/null | sed 's/.*=[[:space:]]*["'"'"']\?\([0-9][0-9.]*\)["'"'"']\?.*/\1/' || true ;;
+    toml) grep -m1 '^version' "$f" 2>/dev/null | sed -E 's/.*=[[:space:]]*"?([0-9][0-9.]*)"?.*/\1/' || true ;;
     *)    grep -oE '[0-9]+\.[0-9]+\.[0-9]+' "$f" 2>/dev/null | head -n1 || true ;;
   esac
 }
@@ -96,9 +96,9 @@ if [[ -n "$version_files" ]]; then
     path="${entry%:*}"; kind="${entry#*:}"
     cur="$(file_version "$path" "$kind")"
     if [[ -n "$cur" && "$cur" == "$version" ]]; then
-      note "$path 已含版本 $version。"
+      note "$path 已含版本 ${version}。"
     else
-      fail "$path（${cur:-未识别}）与目标版本 $version 不一致。"
+      fail "${path}（${cur:-未识别}）与目标版本 $version 不一致。"
     fi
   done
 else

@@ -49,7 +49,7 @@ if [[ -n "$trunk" ]]; then
   if [[ "$current_branch" == "$trunk" ]]; then
     note "当前分支是主干：$current_branch"
   else
-    fail "当前分支 $current_branch 不是主干 $trunk。"
+    fail "当前分支 $current_branch 不是主干 ${trunk}。"
   fi
 else
   warn "未指定主干分支，跳过分支检查。"

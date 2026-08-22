@@ -47,7 +47,7 @@ done < <(git for-each-ref \
   --format='%(refname:short)%09%(upstream:track)' \
   refs/heads/)
 
-for branch in "${gone_branches[@]}"; do
+for branch in ${gone_branches[@]+"${gone_branches[@]}"}; do
   if [[ "$branch" == "$current_branch" ]]; then
     echo "当前分支 $current_branch 的远程跟踪分支已删除，请先切换到其他分支后重试。" >&2
     exit 1

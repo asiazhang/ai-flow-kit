@@ -65,7 +65,7 @@ else
   push_refspec="HEAD"
   has_upstream=false
   git remote get-url "$push_remote" >/dev/null 2>&1 || {
-    echo "找不到 $push_remote，已停止。" >&2
+    echo "找不到 ${push_remote}，已停止。" >&2
     exit 1
   }
   pending_base="$(git symbolic-ref -q "refs/remotes/$push_remote/HEAD" 2>/dev/null | sed 's|^refs/remotes/||' || true)"
