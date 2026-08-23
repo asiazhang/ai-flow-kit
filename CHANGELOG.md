@@ -9,7 +9,7 @@
 ### Fixed
 
 - **CI**：修复 ShellCheck 警告——移除 `check-skills-consistency.sh` 中未使用的 `fail` 变量、精简 `inspect-staged.sh` 中被 `*secret*` 覆盖的冗余模式 `*/.secret*`；并去掉 ShellCheck 步骤的 `continue-on-error`，使其不再掩盖静态检查失败
-- **CI**：升级 GitHub Actions 到最新版（`actions/checkout@v7`、`astral-sh/setup-uv@v10`），消除 Node.js 20 deprecation 告警（Node 24 runtime）
+- **CI**：升级 GitHub Actions 到最新版（`actions/checkout@v7`、`astral-sh/setup-uv@v10.0.1`），消除 Node.js 20 deprecation 告警（Node 24 runtime）
 
 ## [1.2.2] - 2026-08-22
 
