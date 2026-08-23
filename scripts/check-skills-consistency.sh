@@ -10,8 +10,6 @@ repo_root="$(git rev-parse --show-toplevel)" || {
 }
 cd "$repo_root"
 
-fail=0
-
 # plugin.json 的 skills 数组（相对路径，如 ./skills/run-release）
 plugin_skills="$(python3 -c "
 import json

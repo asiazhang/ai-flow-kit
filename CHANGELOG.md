@@ -6,6 +6,10 @@
 
 - **仓库**：新增 pytest 测试套件（`tests/`，通过 `uv run pytest` 运行，覆盖全部 Skill 脚本的返回值、输出区段与临时仓库场景）与 GitHub Actions CI（push/PR 自动执行 bash 语法检查、测试与 README/plugin.json 一致性校验）
 
+### Fixed
+
+- **CI**：修复 ShellCheck 警告——移除 `check-skills-consistency.sh` 中未使用的 `fail` 变量、精简 `inspect-staged.sh` 中被 `*secret*` 覆盖的冗余模式 `*/.secret*`；并去掉 ShellCheck 步骤的 `continue-on-error`，使其不再掩盖静态检查失败
+
 ## [1.2.2] - 2026-08-22
 
 ### Fixed

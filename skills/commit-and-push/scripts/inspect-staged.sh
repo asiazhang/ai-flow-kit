@@ -32,7 +32,7 @@ staged_paths=()
 while IFS= read -r -d '' path; do
   staged_paths+=("$path")
   case "$path" in
-    .env|.env.*|*/.env|*/.env.*|*.pem|*.key|credentials*|*/credentials*|*secret*|*/.secret*|*.log|*/logs/*|node_modules/*|*/node_modules/*|dist/*|*/dist/*|*~|*.bak|*.swp)
+    .env|.env.*|*/.env|*/.env.*|*.pem|*.key|credentials*|*/credentials*|*secret*|*.log|*/logs/*|node_modules/*|*/node_modules/*|dist/*|*/dist/*|*~|*.bak|*.swp)
       blocked_paths+=("$path")
       ;;
   esac

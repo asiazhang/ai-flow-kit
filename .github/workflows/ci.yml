@@ -22,7 +22,6 @@ jobs:
           echo "语法检查通过：${#scripts[@]} 个脚本"
 
       - name: ShellCheck 静态检查
-        continue-on-error: true
         run: |
           scripts=()
           while IFS= read -r f; do scripts+=("$f"); done < <(find . -type f -name '*.sh' -not -path './.git/*' | sort)
