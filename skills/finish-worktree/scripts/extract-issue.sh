@@ -86,8 +86,10 @@ extract_numbers() {
 }
 
 # 带关闭关键词的引用（GitHub 自动关闭语法，大小写不敏感；词边界避免
-# "prefix #3" 之类子串误命中 fix 等关键词，遵循宁可不关、不要关错）
-closes_numbers="$(extract_numbers '[[:<:]](close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)[[:space:]]*#[0-9]+')"
+# "prefix #3" 之类子串误命中 fix 等关键词，遵循宁可不关、不要关错。
+# 用 (^|[^[:alnum:]_]) 显式表达行首/非单词字符前缀：GNU grep 的 [[:<:]]
+# 不匹配行首单词（macOS BSD grep 匹配），跨平台行为不一致）
+closes_numbers="$(extract_numbers '(^|[^[:alnum:]_])(close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)[[:space:]]*#[0-9]+')"
 # 全部引用（#N，含关闭关键词引用）
 candidates="$(extract_numbers '#[0-9]+')"
 
