@@ -32,6 +32,8 @@ npx skills@latest add asiazhang/ai-flow-kit
 
 Skill 定义在 `skills/<skill-name>/SKILL.md`。新增或修改 Skill 前，请参考 [AGENTS.md](./AGENTS.md) 中的开发规范。
 
+修改 Skill 脚本后运行 `uv run pytest` 执行测试套件（每个用例在临时 Git 仓库中验证脚本行为）。仓库通过 GitHub Actions 在 push/PR 上自动运行语法检查、测试与一致性校验。
+
 ## 发布
 
 发布流程参见 [`skills/run-release/SKILL.md`](skills/run-release/SKILL.md)，使用 `run-release` Skill 执行。

@@ -33,6 +33,18 @@ git status --short
 
 确认每个 Skill 都存在 `SKILL.md`、frontmatter 可解析，且 `plugin.json` 的 `skills` 数组与 `skills/` 目录一致。
 
+## 测试
+
+脚本行为由 `tests/` 下的 pytest 用例覆盖（每个用例在临时 Git 仓库中调用脚本并断言输出，见 `tests/conftest.py` 的 `Repo` fixture）。修改 Skill 脚本后运行：
+
+```bash
+uv run pytest
+```
+
+测试按 Skill 脚本一一对应：修改 `skills/<skill>/scripts/<name>.sh` 时，同步检查对应的 `tests/test_<name>.py` 是否需要更新。
+
+GitHub Actions（`.github/workflows/ci.yml`）在 push/PR 上自动执行：bash 语法检查、测试套件、README 与 plugin.json 一致性校验。
+
 ## 版本与发布
 
 面向用户的变更记录在 `CHANGELOG.md` 中维护。发布时遵循 [SemVer](https://semver.org/) 并创建对应的 Git tag，同步 `.claude-plugin/plugin.json` 中的版本号。

@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- **仓库**：新增 pytest 测试套件（`tests/`，通过 `uv run pytest` 运行，覆盖全部 Skill 脚本的返回值、输出区段与临时仓库场景）与 GitHub Actions CI（push/PR 自动执行 bash 语法检查、测试与 README/plugin.json 一致性校验）
+
 ## [1.2.2] - 2026-08-22
 
 ### Fixed

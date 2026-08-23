@@ -1,0 +1,15 @@
+[project]
+name = "ai-flow-kit"
+version = "0.0.0"
+description = "AI Flow Kit 工作流 Skill 集合（测试套件）"
+# 仓库版本以 git tag 为准（见 skills/run-release），此处不维护版本号
+requires-python = ">=3.9"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

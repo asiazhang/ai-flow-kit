@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    name: 语法检查、测试与一致性校验
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: Bash 语法检查
+        run: |
+          set -euo pipefail
+          scripts=()
+          while IFS= read -r f; do scripts+=("$f"); done < <(find . -type f -name '*.sh' -not -path './.git/*' | sort)
+          for f in "${scripts[@]}"; do bash -n "$f"; done
+          echo "语法检查通过：${#scripts[@]} 个脚本"
+
+      - name: ShellCheck 静态检查
+        continue-on-error: true
+        run: |
+          scripts=()
+          while IFS= read -r f; do scripts+=("$f"); done < <(find . -type f -name '*.sh' -not -path './.git/*' | sort)
+          shellcheck -S warning "${scripts[@]}"
+
+      - name: 安装 uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: 运行测试套件
+        run: |
+          uv sync --frozen
+          uv run pytest
+
+      - name: 校验 README 与 plugin.json 一致性
+        run: bash scripts/check-skills-consistency.sh
