@@ -1,6 +1,6 @@
 ---
 name: finish-worktree
-description: 在 dev worktree 内把当前 dev 分支以 --no-ff 合并进 main 并推送，合并推送成功后关闭最相关的关联 GitHub issue，并清理 worktree 与本地/远程 dev 分支（残留项不阻断、列入报告）；已合入时跳过合并，合并冲突或推送反复被拒时停止并报告，无法可靠识别关联 issue 时不关闭
+description: 在 dev worktree 内完成收尾：把 dev 分支合并进 main 并推送，关闭关联 GitHub issue，清理 worktree 与本地/远程 dev 分支，输出统一报告
 disable-model-invocation: true
 user-invocable: true
 tools: Bash
@@ -15,7 +15,7 @@ tools: Bash
 - 工作区（dev worktree 或主 worktree）存在未提交修改——先运行 `commit-and-push` 提交后再执行；
 - 合并产生冲突——报告冲突文件，不自动解决；
 - 推送被拒且重试一次后仍被拒——停止，请人工处理；
-- 无法可靠识别关联 issue 或查询状态失败——不关闭（防误关）。
+- 无法可靠识别关联 issue 或查询状态失败——不关闭（宁可不关、不要关错）。
 
 任何一步停止时，最终报告说明停止点与原因，不自动继续。流程结束后输出六要素统一报告（见步骤 6）。
 
@@ -63,21 +63,20 @@ bash "<skill-dir>/scripts/extract-issue.sh"
 bash "<skill-dir>/scripts/merge-push.sh"
 ```
 
-脚本自动定位 `main` 所在 worktree，执行 `git fetch` 刷新 `origin/main`；本地 `main` 落后远程时先合并 `origin/main`；随后以 `git merge --no-ff` 合并当前 dev 分支（保留分支上下文历史）；最后 `git push origin main`。
+脚本自动定位 `main` 所在 worktree：刷新 `origin/main`，本地主干落后远程时先同步，再以 `git merge --no-ff` 合并当前 dev 分支，最后推送 `origin main`。
 
-- 当前分支已合入主干（`ALREADY_MERGED=true`）时，脚本跳过 dev 合并（不创建空合并提交）；若本地主干落后远程，仍会同步并推送，保证远程最新——重复运行安全；
-- 合并产生冲突时脚本停止并报告冲突文件，不自动解决，由用户处理；
-- 推送被拒且本次尚未同步过远程主干时，脚本同步后重试一次；重试仍被拒则停止并报告。
+- 已合入主干（`ALREADY_MERGED=true`）时跳过 dev 合并，仍同步并推送保证远程最新——重复运行安全；
+- 合并冲突或推送被拒时按安全边界停止：冲突报告文件、不自动解决；推送被拒时脚本同步后重试一次，仍被拒则停止。
 
 记录输出的 `ALREADY_MERGED`、`MERGE_COMMIT`、`SYNCED` 与 `PUSHED`（推送状态）。
 
-**`MERGE_COMMIT` 语义**：仅在未跳过 dev 合并时非空，值为最终推送的 `HEAD`（推送被拒重试时该哈希为同步合并提交，其历史包含 dev 合并）；跳过 dev 合并时为空。已合入但主干落后时仍会同步推送（产生新同步合并提交），此时 `MERGE_COMMIT` 仍为空——报告需如实转述 `SYNCED=true`，不说"未产生新提交"。
+**`MERGE_COMMIT` 语义**：仅未跳过 dev 合并时非空，值为最终推送的 `HEAD`（推送被拒重试时可能指向同步合并提交）；跳过 dev 合并时为空——报告如实转述"已合入主干，未创建 dev 合并提交"，若 `SYNCED=true` 说明主干已同步（可能产生同步合并提交）。
 
-**完成条件**：`PUSHED=true` 且已记录 `MERGE_COMMIT`；未发生冲突或推送反复被拒。
+**完成条件**：`PUSHED=true`；未跳过 dev 合并时已记录 `MERGE_COMMIT`（已合入时为空属预期，不视为失败）；未发生冲突或推送反复被拒。
 
 ### 4. Close：关闭关联 issue
 
-仅当 Identify 已确定 issue 号、且 Merge 输出 `PUSHED=true` 与 `MERGE_COMMIT` 非空时执行：
+仅当 Identify 已确定 issue 号、且 Merge 输出 `PUSHED=true` 与 `MERGE_COMMIT` 非空时执行；`MERGE_COMMIT` 为空（已合入主干）时无法在评论中注明合并提交哈希，**跳过 Close** 并在最终报告说明（宁可不关、不要关错）：
 
 ```bash
 MERGE_COMMIT=<merge-push 输出的 MERGE_COMMIT> bash "<skill-dir>/scripts/close-issue.sh" <issue-number>
@@ -87,11 +86,9 @@ MERGE_COMMIT=<merge-push 输出的 MERGE_COMMIT> bash "<skill-dir>/scripts/close
 
 - 已关闭（`CLOSED`）：跳过评论与关闭，输出 `SKIPPED=true`——重复执行幂等；
 - 开放：先留评论注明合并提交哈希，再 `gh issue close`；
-- 查询失败或无法确认状态：停止且不关闭（防误关）。
+- 查询失败或无法确认状态：按安全边界停止且不关闭（宁可不关、不要关错）。
 
 记录输出的 `ISSUE_NUMBER`、`REPO`、`ISSUE_STATE`、`COMMENTED`、`CLOSED`。
-
-分支已合入（`ALREADY_MERGED=true`）时 Merge 不产生 dev 合并提交（`MERGE_COMMIT` 为空），无法在评论中注明 dev 合并提交哈希，此时**跳过 Close 步骤**并在最终报告说明（宁可不关、不要关错）。
 
 **完成条件**：`CLOSED=true` 或 `SKIPPED=true`；未发生状态查询失败。
 
@@ -105,11 +102,9 @@ bash "<skill-dir>/scripts/cleanup.sh"
 
 脚本在 dev worktree 目录内运行，切到主 worktree 后逐项清理：
 
-- `git worktree remove` 移除当前 dev worktree；目录含未跟踪或修改文件（或已锁定）时 git 拒绝，脚本报告残留，**绝不 `--force`**；
-- `git push origin --delete` 删除远程 dev 分支；远程分支已不存在时视为完成（`REMOTE_BRANCH_DELETED=skipped-gone`）；删除后 `git remote prune origin` 清理过期的远程跟踪引用（失败不阻断），避免本地分支误判；
-- `git branch -d` 删除本地 dev 分支；分支未合并或仍被 worktree 检出时保留并报告，**绝不自动 `-D`**。
-
-先删远程再删本地：`git branch -d` 相对 upstream 判定合并，若远程跟踪引用滞后（本地领先远程但已合入 main，merge-push 只推 main 不更新远程 dev 分支），会误报 `not fully merged`；prune 后 -d 相对当前主干判定，可正确删除。
+- `git worktree remove` 移除当前 dev worktree：git 拒绝时（含未跟踪/修改文件或已锁定）报告残留，**绝不 `--force`**；
+- `git push origin --delete` 删除远程 dev 分支：远程分支已不存在时视为完成（`REMOTE_BRANCH_DELETED=skipped-gone`）；删除后 `git remote prune origin` 清理过期远程跟踪引用；
+- `git branch -d` 删除本地 dev 分支：分支未合并或仍被 worktree 检出时保留并报告，**绝不自动 `-D`**。
 
 单项失败不阻断整体流程，残留项全部列入 `REMAINING` 区段，最终报告需逐项转述。重复运行幂等：已移除/已删除项视为完成，不产生虚假残留。
 
