@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.3.1] - 2026-08-23
+
+### Changed
+
+- **`finish-worktree` Skill**：完善收尾流程文档——新增 ADR（`docs/adr/0001-finish-worktree-全自动收尾.md`）与 `CONTEXT.md` 术语表，精简 SKILL.md 并修正完成条件，便于后续维护与 AI 导航
+
 ## [1.3.0] - 2026-08-23
 
 ### Added
