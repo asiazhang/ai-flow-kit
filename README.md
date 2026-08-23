@@ -25,7 +25,7 @@ npx skills@latest add asiazhang/ai-flow-kit
 | `branch-summary` | 同步主干后分析当前分支的已提交变更，并总结修改意图 |
 | `clean-branches` | 确认后安全清理远程已删除的本地跟踪分支 |
 | `commit-and-push` | 自动提交全部本地变更并推送当前分支，无需确认；推送被拒时自动 merge 重试 |
-| `finish-worktree` | 在 dev worktree 内把当前分支合并进 main 并推送（含同步远程主干与被拒重试）；已合入时跳过合并，合并冲突或推送反复被拒时停止并报告 |
+| `finish-worktree` | 在 dev worktree 内把当前分支合并进 main 并推送（含同步远程主干与被拒重试），合并推送成功后关闭最相关的关联 GitHub issue；已合入时跳过合并，冲突或推送反复被拒时停止，无法可靠识别 issue 时不关闭 |
 | `new-branch` | 自动生成分支名并同步主干创建开发分支，无需确认；未提交修改自动暂存并在新分支恢复，未提供描述时询问一次 |
 | `run-release` | 按发布流程发布新版本：按约定式提交自动判定版本号、更新 CHANGELOG/plugin.json、校验前置状态、提交并打标签（本地动作自动执行，仅 push 前确认一次；可配置 autoPush 跳过确认） |
 

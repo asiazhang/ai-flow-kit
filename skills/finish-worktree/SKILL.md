@@ -1,6 +1,6 @@
 ---
 name: finish-worktree
-description: 在 dev worktree 内识别 worktree 与合并前状态，把当前 dev 分支以 --no-ff 合并进 main 并推送；分支已合入时跳过合并，合并冲突或推送反复被拒时停止并报告，不自动解决
+description: 在 dev worktree 内把当前 dev 分支以 --no-ff 合并进 main 并推送，合并推送成功后关闭最相关的关联 GitHub issue；已合入时跳过合并，合并冲突或推送反复被拒时停止并报告，无法可靠识别关联 issue 时不关闭
 disable-model-invocation: true
 user-invocable: true
 tools: Bash
@@ -10,7 +10,7 @@ tools: Bash
 
 在当前 dev worktree 目录内执行收尾流程的合并阶段：把 dev 分支合并进 `main` 并推送。除合并冲突、推送反复被拒等安全边界外不停止等待用户。
 
-> **实现状态**：本骨架当前包含 **Preflight** 与 **Merge** 两个步骤；Identify/Close（关联 issue 关闭）与 Cleanup（worktree 与分支清理）步骤由后续任务补齐。
+> **实现状态**：本骨架当前包含 **Preflight / Identify / Merge / Close** 四个步骤；Cleanup（worktree 与分支清理）步骤由后续任务补齐。
 
 命令中的 `<skill-dir>` 指本 Skill 所在目录。当前必须在 dev worktree 目录内运行。
 
@@ -28,7 +28,25 @@ bash "<skill-dir>/scripts/preflight.sh"
 
 **完成条件**：确认当前处于 dev worktree（非主 worktree）；当前分支已固定；工作区已提交干净；已记录分支是否已合入主干。
 
-### 2. Merge：同步主干、合并并推送
+### 2. Identify：识别最相关的关联 issue
+
+执行：
+
+```bash
+bash "<skill-dir>/scripts/extract-issue.sh"
+```
+
+脚本只读当前分支独有提交（相对 main）的提交信息，提取 issue 引用（`#N` / `Closes #N` / `Fixes #N`），输出候选列表：`CLOSES` 区段为带关闭关键词的引用，`CANDIDATES` 区段为全部引用。
+
+结合会话上下文中确认的 worktree 关联 issue 号，与脚本输出互相校验，确定**仅一个**最相关的 issue 号：
+
+- 提交信息含关闭关键词（如 `Closes #N`）时优先考虑；
+- 会话确认的 issue 号与候选不一致、提取模糊或无法确认时，**选择不关闭**（宁可不关、不要关错）；
+- 无候选且会话未确认 issue 时，跳过 Close 步骤。
+
+**完成条件**：已确定待关闭的 issue 号，或明确决定跳过关闭。
+
+### 3. Merge：同步主干、合并并推送
 
 执行：
 
@@ -45,3 +63,23 @@ bash "<skill-dir>/scripts/merge-push.sh"
 记录输出的 `ALREADY_MERGED`、`MERGE_COMMIT`（合并提交哈希，跳过合并时为空）与 `PUSHED`（推送状态）。
 
 **完成条件**：`PUSHED=true` 且已记录 `MERGE_COMMIT`；未发生冲突或推送反复被拒。
+
+### 4. Close：关闭关联 issue
+
+仅当 Identify 已确定 issue 号、且 Merge 输出 `PUSHED=true` 与 `MERGE_COMMIT` 非空时执行：
+
+```bash
+MERGE_COMMIT=<merge-push 输出的 MERGE_COMMIT> bash "<skill-dir>/scripts/close-issue.sh" <issue-number>
+```
+
+脚本先从 `origin` remote 解析 repo（`owner/repo`），经 `GH_BIN`（默认 `gh`，可注入测试桩）查询 issue 状态：
+
+- 已关闭（`CLOSED`）：跳过评论与关闭，输出 `SKIPPED=true`——重复执行幂等；
+- 开放：先留评论注明合并提交哈希，再 `gh issue close`；
+- 查询失败或无法确认状态：停止且不关闭（防误关）。
+
+记录输出的 `ISSUE_NUMBER`、`REPO`、`ISSUE_STATE`、`COMMENTED`、`CLOSED`。
+
+分支已合入（`ALREADY_MERGED=true`）时 Merge 不产生新合并提交（`MERGE_COMMIT` 为空），无法在评论中注明合并提交哈希，此时**跳过 Close 步骤**并在最终报告说明（宁可不关、不要关错）。
+
+**完成条件**：`CLOSED=true` 或 `SKIPPED=true`；未发生状态查询失败。

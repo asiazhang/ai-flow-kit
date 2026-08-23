@@ -41,11 +41,14 @@ def run_script(script: Path, cwd: Path, *args: str) -> subprocess.CompletedProce
     )
 
 
-def commit_in(path: Path, msg: str) -> None:
-    """在指定工作目录提交一个带内容的文件。"""
+def commit_in(path: Path, msg: str, body: str | None = None) -> None:
+    """在指定工作目录提交一个带内容的文件，可附提交正文（如 BREAKING CHANGE）。"""
     (path / "f.txt").write_text(f"{msg}\n")
     git("add", "-A", cwd=path)
-    git("commit", "-qm", msg, cwd=path)
+    if body:
+        git("commit", "-qm", msg, "-m", body, cwd=path)
+    else:
+        git("commit", "-qm", msg, cwd=path)
 
 
 def kv(output: str, key: str) -> str:
