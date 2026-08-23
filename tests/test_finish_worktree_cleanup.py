@@ -130,6 +130,34 @@ def test_cleanup_remote_branch_already_gone(repo_factory):
     assert section(p.stdout, "REMAINING") == ""
 
 
+def test_cleanup_local_ahead_of_remote_still_deletes(repo_factory):
+    """本地 dev 分支领先远程（真实流程：merge-push 只推 main 不更新远程 dev 分支）。
+
+    已合入 main 时，先删远程分支并 remote prune 清理过期跟踪引用，再 branch -d
+    可正确判定（相对 HEAD 已合并）；修复前 git 按滞后的 upstream 误报 not fully merged。
+    """
+    repo = repo_factory()
+    wt = repo.add_worktree("feature", "dev/feature")
+    commit_in(wt, "feat: feature 1")
+    push_dev_branch(wt, "dev/feature")  # 推送过 dev 分支（建立 upstream）
+    commit_in(wt, "feat: feature 2")  # 本地领先远程
+    merge_dev_into_main(repo, "dev/feature")
+    # 远程 dev 分支仍指向旧提交（滞后于本地）
+
+    p = run_cleanup(wt)
+    assert p.returncode == 0, out(p)
+    assert kv(p.stdout, "WORKTREE_REMOVED") == "true"
+    assert kv(p.stdout, "LOCAL_BRANCH_DELETED") == "true"  # 修复点：不再误判残留
+    assert kv(p.stdout, "REMOTE_BRANCH_DELETED") == "true"
+    assert section(p.stdout, "REMAINING") == ""
+
+    # 本地/远程分支均已删除，提交保留在 main
+    assert not has_local_branch(repo, "dev/feature")
+    assert "refs/heads/dev/feature" not in remote_refs(repo)
+    history = git("log", "--oneline", "main", cwd=repo.work).stdout
+    assert "feat: feature 2" in history
+
+
 def test_cleanup_partial_failure_does_not_block(repo_factory):
     """单项失败不阻断：worktree 未跟踪 + 未合并，远程分支仍被删除。"""
     repo = repo_factory()

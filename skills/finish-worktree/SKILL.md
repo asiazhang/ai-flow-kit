@@ -106,8 +106,10 @@ bash "<skill-dir>/scripts/cleanup.sh"
 脚本在 dev worktree 目录内运行，切到主 worktree 后逐项清理：
 
 - `git worktree remove` 移除当前 dev worktree；目录含未跟踪或修改文件（或已锁定）时 git 拒绝，脚本报告残留，**绝不 `--force`**；
-- `git branch -d` 删除本地 dev 分支；分支未合并或仍被 worktree 检出时保留并报告，**绝不自动 `-D`**；
-- `git push origin --delete` 删除远程 dev 分支；远程分支已不存在时视为完成（`REMOTE_BRANCH_DELETED=skipped-gone`）。
+- `git push origin --delete` 删除远程 dev 分支；远程分支已不存在时视为完成（`REMOTE_BRANCH_DELETED=skipped-gone`）；删除后 `git remote prune origin` 清理过期的远程跟踪引用（失败不阻断），避免本地分支误判；
+- `git branch -d` 删除本地 dev 分支；分支未合并或仍被 worktree 检出时保留并报告，**绝不自动 `-D`**。
+
+先删远程再删本地：`git branch -d` 相对 upstream 判定合并，若远程跟踪引用滞后（本地领先远程但已合入 main，merge-push 只推 main 不更新远程 dev 分支），会误报 `not fully merged`；prune 后 -d 相对当前主干判定，可正确删除。
 
 单项失败不阻断整体流程，残留项全部列入 `REMAINING` 区段，最终报告需逐项转述。重复运行幂等：已移除/已删除项视为完成，不产生虚假残留。
 

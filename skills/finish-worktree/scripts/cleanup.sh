@@ -7,12 +7,13 @@ usage() {
   cleanup.sh
 
 合并推送成功后清理残留（在 dev worktree 目录内运行）：切到主 worktree，逐项
-移除当前 dev worktree、删除本地 dev 分支、删除远程 dev 分支。
+移除当前 dev worktree、删除远程 dev 分支、删除本地 dev 分支。
 - git worktree remove：目录含未跟踪或修改文件（或已锁定）时 git 拒绝，
   报告残留，绝不 --force；
-- git branch -d：分支未合并或仍被 worktree 检出时保留并报告，绝不自动 -D；
 - git push origin --delete：远程分支已不存在时视为完成
-  （REMOTE_BRANCH_DELETED=skipped-gone）。
+  （REMOTE_BRANCH_DELETED=skipped-gone）；删除后 git remote prune origin
+  清理过期的远程跟踪引用（失败不阻断），避免 git branch -d 误判；
+- git branch -d：分支未合并或仍被 worktree 检出时保留并报告，绝不自动 -D。
 单项失败不阻断整体流程，残留项全部列入 REMAINING 区段，脚本以 0 退出。
 重复运行时已移除/已删除项视为完成（幂等）。
 
@@ -100,18 +101,9 @@ else
   remaining+=("worktree ${repo_root}：$(collapse "$wt_remove_out")，未使用 --force")
 fi
 
-# 2. 删除本地 dev 分支：已合并才删除，绝不自动 -D；
-#    分支已不存在（重复运行）时视为已删除
-local_deleted=false
-if ! git rev-parse -q --verify "refs/heads/$current_branch" >/dev/null 2>&1; then
-  local_deleted=true
-elif branch_del_out="$(git branch -d -- "$current_branch" 2>&1)"; then
-  local_deleted=true
-else
-  remaining+=("本地分支 ${current_branch}：$(collapse "$branch_del_out")，未使用 -D")
-fi
-
-# 3. 删除远程 dev 分支：已不存在（ls-remote --exit-code=2）视为完成
+# 2. 删除远程 dev 分支：已不存在（ls-remote --exit-code=2）视为完成。
+#    先删远程再删本地：git branch -d 相对 upstream 判定合并，若远程跟踪引用
+#    滞后（本地领先远程但已合入 main），会误报 not fully merged。
 remote_deleted=false
 ls_code=0
 git ls-remote --exit-code origin "refs/heads/$current_branch" >/dev/null 2>&1 || ls_code=$?
@@ -125,6 +117,22 @@ elif [[ "$ls_code" -eq 2 ]]; then
   remote_deleted="skipped-gone"
 else
   remaining+=("远程分支 origin/${current_branch}：无法确认远程状态（ls-remote 退出码 ${ls_code}）")
+fi
+
+# 清理过期的远程跟踪引用：删除远程分支后 refs/remotes/origin/<branch> 仍残留，
+# 会让 git branch -d 误判「未完全合并」。prune 失败（如网络不可达）不阻断，
+# 本地分支仍按 -d 判定，误判时保留并列入残留。
+git remote prune origin >/dev/null 2>&1 || true
+
+# 3. 删除本地 dev 分支：已合并才删除，绝不自动 -D；
+#    分支已不存在（重复运行）时视为已删除
+local_deleted=false
+if ! git rev-parse -q --verify "refs/heads/$current_branch" >/dev/null 2>&1; then
+  local_deleted=true
+elif branch_del_out="$(git branch -d -- "$current_branch" 2>&1)"; then
+  local_deleted=true
+else
+  remaining+=("本地分支 ${current_branch}：$(collapse "$branch_del_out")，未使用 -D")
 fi
 
 printf 'CURRENT_BRANCH=%s\n' "$current_branch"
