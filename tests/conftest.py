@@ -41,6 +41,16 @@ def run_script(script: Path, cwd: Path, *args: str) -> subprocess.CompletedProce
     )
 
 
+def commit_in(path: Path, msg: str, body: str | None = None) -> None:
+    """在指定工作目录提交一个带内容的文件，可附提交正文（如 BREAKING CHANGE）。"""
+    (path / "f.txt").write_text(f"{msg}\n")
+    git("add", "-A", cwd=path)
+    if body:
+        git("commit", "-qm", msg, "-m", body, cwd=path)
+    else:
+        git("commit", "-qm", msg, cwd=path)
+
+
 def kv(output: str, key: str) -> str:
     """提取 KEY=VALUE 输出行中的 VALUE。"""
     for line in output.splitlines():
@@ -81,7 +91,7 @@ class Repo:
     """带裸远程的临时工作仓库：remote.git + work/，默认分支 main。"""
 
     def __init__(self) -> None:
-        self.root = Path(tempfile.mkdtemp(prefix="ai-flow-kit-test-"))
+        self.root = Path(tempfile.mkdtemp(prefix="ai-flow-kit-test-")).resolve()
         self.remote = self.root / "remote.git"
         self.work = self.root / "work"
         self._counter = 0
@@ -111,6 +121,15 @@ class Repo:
             self.git("commit", "-qm", msg, "-m", body)
         else:
             self.git("commit", "-qm", msg)
+
+    def add_worktree(self, name: str, branch: str) -> Path:
+        """新增附加 worktree（从当前 HEAD 检出到新分支），返回其路径。
+
+        模拟主 checkout（main）+ dev worktree 并存的真实场景。
+        """
+        path = self.root / "worktrees" / name
+        self.git("worktree", "add", "-b", branch, str(path))
+        return path
 
     def script(self, relative: str, *args: str) -> subprocess.CompletedProcess:
         """运行 skills/<skill>/scripts/<name>.sh（相对 skills 目录）。"""

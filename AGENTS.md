@@ -50,3 +50,17 @@ GitHub Actions（`.github/workflows/ci.yml`）在 push/PR 上自动执行：bash
 面向用户的变更记录在 `CHANGELOG.md` 中维护。发布时遵循 [SemVer](https://semver.org/) 并创建对应的 Git tag，同步 `.claude-plugin/plugin.json` 中的版本号。
 
 发布前先读 [`skills/run-release/SKILL.md`](skills/run-release/SKILL.md)，按其执行完整发布流程。
+
+## Agent skills
+
+### Issue tracker
+
+Issues and specs live in GitHub Issues for this repo. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Five canonical roles map to same-named labels (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: root `CONTEXT.md` + `docs/adr/`. See `docs/agents/domain.md`.

@@ -4,6 +4,7 @@
 
 ### Added
 
+- **`finish-worktree` Skill**：新增收尾 Skill——在 dev worktree 内全自动执行"合并主干 → 关闭关联 issue → 清理 worktree 与分支"完整流程：`preflight.sh` 识别 worktree 并校验工作区干净；`extract-issue.sh` 从提交信息提取 issue 引用（与会话确认互相校验，仅关闭最相关一个 issue）；`merge-push.sh` 同步远程主干后以 `--no-ff` 合并进 main 并推送（被拒自动重试一次，冲突则停止报告）；`close-issue.sh` 关闭前留评论注明合并提交哈希（已关闭幂等跳过，无法确认状态不关闭）；`cleanup.sh` 移除 worktree、删除本地/远程 dev 分支（单项失败不阻断、残留列入报告）。全程无确认 gate；结束输出六要素统一报告（合并提交、推送状态、issue 关闭结果、worktree/分支清理结果、残留项）。gh 调用经 `GH_BIN` 可注入测试桩，CI 无真实网络依赖
 - **仓库**：新增 pytest 测试套件（`tests/`，通过 `uv run pytest` 运行，覆盖全部 Skill 脚本的返回值、输出区段与临时仓库场景）与 GitHub Actions CI（push/PR 自动执行 bash 语法检查、测试与 README/plugin.json 一致性校验）
 
 ### Fixed
