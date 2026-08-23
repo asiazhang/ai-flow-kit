@@ -61,16 +61,15 @@ def version_files():
             kind = 'json' if path.endswith('.json') else ('toml' if path.endswith('.toml') else 'text')
         out.append(path + ':' + kind)
     return ' '.join(out)
-print('cfg_version_files=%r' % version_files())
-print('cfg_changelog=%r' % s('changelog'))
-print('cfg_tag_prefix=%r' % s('tagPrefix'))
-print('cfg_trunk=%r' % s('trunkBranch'))
-print('cfg_pre_cmd=%r' % s('preReleaseCommand'))
-print('cfg_post_cmd=%r' % s('postUpdateCommand'))
-print('cfg_auto_push=%r' % ('true' if d.get('autoPush') is True else 'false'))
+sep = '\x1f'
+print(sep.join([
+    version_files(), s('changelog'), s('tagPrefix'), s('trunkBranch'),
+    s('preReleaseCommand'), s('postUpdateCommand'),
+    'true' if d.get('autoPush') is True else 'false',
+]))
 PY
 )"
-  eval "$cfg"
+  IFS=$'\x1f' read -r cfg_version_files cfg_changelog cfg_tag_prefix cfg_trunk cfg_pre_cmd cfg_post_cmd cfg_auto_push <<< "$cfg"
 fi
 
 # --- 当前版本：从最近 tag 读（tag 是唯一真值） ---

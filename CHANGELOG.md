@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [1.3.0] - 2026-08-23
 
 ### Added
 
@@ -9,6 +9,7 @@
 
 ### Fixed
 
+- **`run-release` Skill**：移除脚本中全部 `eval` 字符串执行——`detect-project.sh` 解析 `.run-release.json` 改用分隔符读取（Python 以 `\x1f` 拼接、shell 以 `IFS` 拆分），`verify-release.sh` 执行发布前命令改用 `bash -c` 子进程隔离，不再污染当前 shell 上下文
 - **`finish-worktree` Skill**：修复 cleanup 本地分支误判——先删远程 dev 分支并 `git remote prune origin` 清理过期的远程跟踪引用，再 `git branch -d`，避免本地 dev 分支领先远程但已合入 main 时误报 `not fully merged` 而残留（仍绝不自动 `-D`）
 - **CI**：修复 ShellCheck 警告——移除 `check-skills-consistency.sh` 中未使用的 `fail` 变量、精简 `inspect-staged.sh` 中被 `*secret*` 覆盖的冗余模式 `*/.secret*`；并去掉 ShellCheck 步骤的 `continue-on-error`，使其不再掩盖静态检查失败
 - **CI**：升级 GitHub Actions 到最新版（`actions/checkout@v7`、`astral-sh/setup-uv@v10.0.1`），消除 Node.js 20 deprecation 告警（Node 24 runtime）

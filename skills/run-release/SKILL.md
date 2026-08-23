@@ -72,7 +72,7 @@ bash "<skill-dir>/scripts/next-version.sh" --current '<当前版本>' --bump '<S
 若 `POST_UPDATE_COMMAND` 非空，在完成上述编辑后执行：
 
 ```bash
-eval '<POST_UPDATE_COMMAND>'
+bash -c '<POST_UPDATE_COMMAND>'
 ```
 
 失败则停下报告。

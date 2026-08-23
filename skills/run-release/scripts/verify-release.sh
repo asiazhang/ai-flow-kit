@@ -142,7 +142,7 @@ fi
 # --- 发布前命令（--command） ---
 if [[ -n "$pre_command" ]]; then
   echo "RUN_COMMAND=$pre_command"
-  if eval "$pre_command" >/dev/null 2>&1; then
+  if bash -c "$pre_command" >/dev/null 2>&1; then
     note "发布前命令通过：$pre_command"
   else
     fail "发布前命令失败：$pre_command"

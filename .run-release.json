@@ -5,5 +5,6 @@
   "changelog": "CHANGELOG.md",
   "tagPrefix": "v",
   "trunkBranch": "main",
-  "postUpdateCommand": "bash scripts/check-skills-consistency.sh"
+  "postUpdateCommand": "bash scripts/check-skills-consistency.sh",
+  "preReleaseCommand": "uv run pytest"
 }
