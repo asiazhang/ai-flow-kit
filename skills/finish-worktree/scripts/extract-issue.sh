@@ -85,8 +85,9 @@ extract_numbers() {
   } | dedupe
 }
 
-# 带关闭关键词的引用（GitHub 自动关闭语法，大小写不敏感）
-closes_numbers="$(extract_numbers '(close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)[[:space:]]*#[0-9]+')"
+# 带关闭关键词的引用（GitHub 自动关闭语法，大小写不敏感；词边界避免
+# "prefix #3" 之类子串误命中 fix 等关键词，遵循宁可不关、不要关错）
+closes_numbers="$(extract_numbers '[[:<:]](close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)[[:space:]]*#[0-9]+')"
 # 全部引用（#N，含关闭关键词引用）
 candidates="$(extract_numbers '#[0-9]+')"
 

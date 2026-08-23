@@ -41,6 +41,19 @@ def test_extract_issue_fixes_in_subject(repo_factory):
     assert section(p.stdout, "CANDIDATES") == "789"
 
 
+def test_extract_issue_word_boundary_avoids_substring_hit(repo_factory):
+    """关键词需词边界："prefix #3" 子串含 fix 但不视为关闭关键词。"""
+    repo = repo_factory()
+    wt = repo.add_worktree("feature", "dev/feature")
+    commit_in(wt, "feat: prefix #3 表述不影响匹配")
+
+    p = run_extract(wt)
+    assert p.returncode == 0, out(p)
+    assert kv(p.stdout, "CLOSES_COUNT") == "0"
+    # 仍是普通候选引用
+    assert section(p.stdout, "CANDIDATES") == "3"
+
+
 def test_extract_issue_no_reference_empty(repo_factory):
     repo = repo_factory()
     wt = repo.add_worktree("feature", "dev/feature")
